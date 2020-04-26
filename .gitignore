@@ -1,0 +1,4 @@
+*.o
+*.cpp
+*.hpp
+demo

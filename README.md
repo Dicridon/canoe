@@ -3,6 +3,7 @@ canoe is a C/C++ project management tool, inspired by Cargo for Rust.
 
 ## Conventions
 The directory structure of a demo canoe project is as follow:
+```
 demo
    |----config
    |----obj
@@ -18,6 +19,7 @@ demo
    |----target
    |     |----demo
    |----third-party
+```
 `demo`: all commands except `canoe new` should be executed under this directory.
 
 `config`: This files configures compilation flags.
@@ -54,17 +56,21 @@ don't want external gems
 Say we are developing a car project. so we type `canoe new car` to create it.
 
 We will have a project like below:
+```
 car
   |----config
+  |----obj
   |----src
   |     |----components
   |     |----main.cpp
   |----target
   |----third-party
-
+```
 now we want to add a component `engine` to this project, so we type `canoe add engine`, and our project would be:
+```
 car
   |----config
+  |----obj
   |----src
   |     |----components
   |     |     |----engine
@@ -73,10 +79,29 @@ car
   |     |----main.cpp
   |----target
   |----third-party
+```
 
 to use classes and funcitons in `eninge`, we just need to include `engine/engine.hpp` in other source files(canoe adds ./components to include path).
 
-after some coding, we want to run this project for a test, so we just need to type `canoe build && canoe run`, canoe would build this project and run the executable binary for you. 
+after some coding, we want to run this project for a test, so we just need to type `canoe build && canoe run`, canoe would build this project and run the executable binary for you. And the project would be:
+```
+car
+  |----config
+  |----obj
+  |     |----engine.o
+  |     |----main.o
+  |----src
+  |     |----components
+  |     |     |----engine
+  |     |     |     |----engine.hpp
+  |     |     |     |----engine.cpp
+  |     |----main.cpp
+  |----target
+  |     |----car
+  |----third-party
+```
+
+
 
 ## Change log
 - v0.1: basic commands `canoe new`, `canoe build`, `canoe clean`, `canoe run`, `canoe add` are available for building executable binary project. 

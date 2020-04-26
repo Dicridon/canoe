@@ -5,6 +5,7 @@ canoe is a C/C++ project management tool, inspired by Cargo for Rust.
 The directory structure of a demo canoe project is as follow:
 demo
    |----config
+   |----obj
    |----src
    |     |----components
    |     |     |----dir1
@@ -19,7 +20,9 @@ demo
    |----third-party
 `demo`: all commands except `canoe new` should be executed under this directory.
 
-`config`: This files configures compilation flags
+`config`: This files configures compilation flags.
+
+`obj`: compiled object files are stored here.
 
 `src`: all source files are seperated into components. `canoe add` may add extra components to this project.
 

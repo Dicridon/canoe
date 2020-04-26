@@ -1,6 +1,8 @@
 require 'fileutils'
 require_relative 'source_files'
 require_relative 'compiler'
+require_relative 'config_reader'
+require_relative 'default_files'
 
 class WorkSpace
     attr_reader :name, :cwd
@@ -59,10 +61,10 @@ class WorkSpace
         Dir.mkdir(@name)
         Dir.mkdir(@src)
         Dir.mkdir(@components)
-        # Dir.mkdir("#{@workspace}/obj")
-        create_main @src if @mode == :bin
+        Dir.mkdir("#{@workspace}/obj")
+        DefaultFiles.create_main @src if @mode == :bin
         File.new("#{@workspace}/.canoe", "w")
-        create_config @workspace
+        DefaultFiles.create_config @workspace
 
         Dir.mkdir(@third)
         Dir.mkdir(@target)
@@ -101,62 +103,9 @@ class WorkSpace
     end
 
 private
-    def open_file_and_write(filename, content)
-        File.open(filename, "w") {|f|
-            f.write(content)
-        }
-    end
-
-    def create_config(path)
-        open_file_and_write(
-            "#{path}/config", 
-            <<~CONFIG
-                [[compiler]]
-                clang++
-
-                [[opt-flags]]
-                -O0
-
-            CONFIG
-        )
-    end
-
-    def create_main(path)
-        open_file_and_write(
-            "#{path}/main.cpp",
-            <<~DOC
-                #include <iostream>
-                int main(int argc, char *argv[]) {
-                    std::cout << "hello world!" << std::endl;
-                }
-            DOC
-        )
-    end
-
-    def create_cpp(filename)
-        open_file_and_write(
-            "#{filename}.cpp", 
-            <<~DOC
-                #include "#{filename}.hpp"
-            DOC
-        )
-    end
-
-    def create_hpp(filename)
-        open_file_and_write(
-            "#{filename}.hpp",
-            <<~DOC
-                #ifndef __#{@name.upcase}__#{filename.upcase}__
-                #define __#{@name.upcase}__#{filename.upcase}__
-
-                #endif
-            DOC
-        )
-    end
-
     def create_working_files(filename)
-        create_cpp filename
-        create_hpp filename
+        DefaultFiles.create_cpp filename
+        DefaultFiles.create_hpp @name, filename
     end
 
     def extract_flags(content)
@@ -180,26 +129,23 @@ private
 
     def build_compiler_from_config
         Dir.chdir(@workspace) do
-            File.open("config", "r") do |f|
-                flags = extract_flags f.read.split
-                compiler_name = ""
-                compiler_flags = ["-Icomponents"]
-                flags.each do |pair|
-                    if pair[0] == "compiler"
-                        compiler_name = pair[1]
-                    elsif pair[0].end_with? "flags"
-                        compiler_flags << pair[1..]
-                    else
-                        puts "unknown options #{pair[0]}"
-                    end
+            flags = ConfigReader.extract_flags "config"
+            compiler_name = ""
+            compiler_flags = ["-Icomponents"]
+            flags.each do |pair|
+                if pair[0] == "compiler"
+                    compiler_name = pair[1]
+                elsif pair[0].end_with? "flags"
+                    compiler_flags << pair[1..]
+                else
+                    puts "unknown options #{pair[0]}"
                 end
-                @compiler = Compiler.new compiler_name, compiler_flags.join(" ")
             end
+            @compiler = Compiler.new compiler_name, compiler_flags.join(" ")
         end
     end
 
-    def compile(f)
-        o = f[0...-3] + "o"
+    def compile(f, o)
         @compiler.compile f, o
     end
 
@@ -208,58 +154,59 @@ private
         @compiler.link "#{odir}/#{@name}", objs
     end
 
-    def build_bin
-        build_compiler_from_config
+    def build_components
+        Dir.chdir(@src) do
+            files = SourceFiles.get_all("./components") do |f|
+                f.end_with? ".cpp"
+            end
+            files.each do |f|
+                o = "../obj/" + f.split("/")[-1][0...-3] + "o"
+                compile f, o
+            end
+        end
+    end
+
+    def build_mains
         Dir.chdir(@src) do
             mains = SourceFiles.get_in(".") do |f|
                 f.end_with? ".cpp"
             end
-
-            files = SourceFiles.get_all("./components") do |f|
-                f.end_with? ".cpp"
+            mains.each do |f|
+                o = "../obj/" + f.split("/")[-1][0...-3] + "o"
+                compile f, o
             end
-            puts "following files would be compiled"
-            puts files + mains
-            puts "compiling....."
-            all = files + mains
-            all.each do |f|
-                compile f
-            end
-
-            objs = all.map {|f| f[0...-3] + "o"}
-            link('../target', objs)
         end
+    end
+
+    def build_bin
+        build_compiler_from_config
+        build_components
+        build_mains
+        link('./target', Dir.glob("obj/*.o"))
     end
 
     def build_lib
         puts "build a lib"
     end
 
+    def clean_obj
+        puts "rm -f ./obj/*.o"
+        system "rm -f ./obj/*.o"
+    end
+
+    def clean_target
+        puts "rm -f ./target/*"
+        system "rm -f ./target/*"
+    end
+
     def clean_bin
-        Dir.chdir(@src) do
-            mains = SourceFiles.get_in(".") do |f|
-                f.end_with? ".o"
-            end
-
-            files = SourceFiles.get_all('./components') do |f|
-                f.end_with? ".o"
-            end
-            all = mains + files
-            puts "following files would be removed"
-            puts files + mains
-            all.each do |f|
-                puts "rm -f #{f}"
-                system "rm -f #{f}"
-            end
-        end
-
-        puts "rm -f ./target/#{@name}"
-        system "rm -f ./target/#{@name}"
-
+        clean_obj
+        clean_target
     end
 
     def clean_lib
-        puts "clean a lib"
+        clean_obj
+        clean_target
     end
 
 public

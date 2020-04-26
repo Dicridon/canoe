@@ -159,18 +159,37 @@ private
         create_hpp filename
     end
 
+    def extract_flags(content)
+        names = []
+        s = [] 
+        content.each_with_index do |c, i|
+            if c.start_with? "[["
+                names << c
+                s << i
+            end
+        end
+        e = s + [content.size]
+        flags = []
+        s.each_with_index do |c, i|
+            res = [names[i].match(/\[\[(.+)\]\]/)[1],
+                   content[(c+1)...e[i+1]]].flatten
+            flags << res
+        end
+        flags
+    end
+
     def build_compiler_from_config
         Dir.chdir(@workspace) do
             File.open("config", "r") do |f|
-                content = f.read
-                flags = content.scan /\[\[(\w+-?\w*)\]\]\s*(.*)/
+                content = f.read.split
+                flags = extract_flags content
                 compiler_name = ""
                 compiler_flags = ["-Icomponents"]
                 flags.each do |pair|
                     if pair[0] == "compiler"
                         compiler_name = pair[1]
                     elsif pair[0].end_with? "flags"
-                        compiler_flags << pair[1]
+                        compiler_flags << pair[1..]
                     else
                         puts "unknown options #{pair[0]}"
                     end
@@ -187,6 +206,7 @@ private
     end
 
     def link(odir, objs)
+        system "#{@compiler} -o #{odir}/#{@name} #{objs.join(" ")}"
         @compiler.link "#{odir}/#{@name}", objs
     end
 

@@ -17,7 +17,9 @@ demo
    |----target
    |     |----demo
    |----third-party
-`demo`: All commands except `canoe new` should be executed under this directory.
+`demo`: all commands except `canoe new` should be executed under this directory.
+
+`config`: This files configures compilation flags
 
 `src`: all source files are seperated into components. `canoe add` may add extra components to this project.
 

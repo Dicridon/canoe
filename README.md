@@ -27,6 +27,26 @@ demo
 
 `third-party`: external libraries are stored here.
 
+## Format of config file
+a config file looks like below
+```
+[[name]]
+values
+
+[[another-name]]
+value1 value2 value3
+value4 value5 value6 value7
+```
+
+### Why not json
+tired of curly-braces
+
+### Why not toml
+don't want external gems
+
+### Why this format
+[[ looks great, while don't want any other redundent symbols
+
 ## Example
 Say we are developing a car project. so we type `canoe new car` to create it.
 

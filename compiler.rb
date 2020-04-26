@@ -1,8 +1,8 @@
 class Compiler
     attr_reader :name, :flags
-    def initialize(name, flags)
+    def initialize(name, flgs)
         @name = name
-        @flags = flags
+        @flags = flgs
     end
 
     def flags_as_str
@@ -24,7 +24,7 @@ class Compiler
     end
 
     def inspect
-        puts "compiler name: #{name}"
-        puts "compiler flags: #{flags}"
+        puts "compiler name: #{name.inspect}"
+        puts "compiler flags: #{flags.inspect}"
     end
 end

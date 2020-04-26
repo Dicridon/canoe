@@ -181,8 +181,7 @@ private
     def build_compiler_from_config
         Dir.chdir(@workspace) do
             File.open("config", "r") do |f|
-                content = f.read.split
-                flags = extract_flags content
+                flags = extract_flags f.read.split
                 compiler_name = ""
                 compiler_flags = ["-Icomponents"]
                 flags.each do |pair|
@@ -195,7 +194,6 @@ private
                     end
                 end
                 @compiler = Compiler.new compiler_name, compiler_flags.join(" ")
-                @compiler.inspect
             end
         end
     end
@@ -216,7 +214,6 @@ private
             mains = SourceFiles.get_in(".") do |f|
                 f.end_with? ".cpp"
             end
-            puts "mains are " + mains.to_s
 
             files = SourceFiles.get_all("./components") do |f|
                 f.end_with? ".cpp"

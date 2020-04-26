@@ -1,5 +1,6 @@
 require 'fileutils'
 require_relative 'source_files'
+require_relative 'compiler'
 
 class WorkSpace
     attr_reader :name, :cwd
@@ -44,7 +45,7 @@ class WorkSpace
 
     def initialize(name, mode)
         @name = name
-        @compiler = "clang++"
+        @compiler = Compiler.new 'clang++', '-Icomponents'
         @cwd = Dir.new(Dir.pwd)
         @workspace = "#{Dir.pwd}/#{@name}"
         @src = "#{@workspace}/src"
@@ -69,25 +70,17 @@ class WorkSpace
     end
 
     def build
-        if @mode == :bin
-            build_bin
-        else
-            build_lib
-        end
+        self.send "build_#{@mode.to_s}"
     end
 
     def clean
-        if @mode == :bin
-            clean_bin
-        else
-            clean_lib
-        end
+        self.send "clean_#{@mode.to_s}"
     end
 
     def run(args)
         args = args.join " "
-        puts "./target/#{name} #{args}"
-        system "./target/#{name} #{args}"
+        puts "./target/#{@name} #{args}"
+        system "./target/#{@name} #{args}"
     end
 
     def add(args)
@@ -121,7 +114,7 @@ private
                 [[compiler]]
                 clang++
 
-                [[flags]]
+                [[opt-flags]]
                 -O0
 
             CONFIG
@@ -166,18 +159,39 @@ private
         create_hpp filename
     end
 
+    def build_compiler_from_config
+        Dir.chdir(@workspace) do
+            File.open("config", "r") do |f|
+                content = f.read
+                flags = content.scan /\[\[(\w+-?\w*)\]\]\s*(.*)/
+                compiler_name = ""
+                compiler_flags = ["-Icomponents"]
+                flags.each do |pair|
+                    if pair[0] == "compiler"
+                        compiler_name = pair[1]
+                    elsif pair[0].end_with? "flags"
+                        compiler_flags << pair[1]
+                    else
+                        puts "unknown options #{pair[0]}"
+                    end
+                end
+                @compiler = Compiler.new compiler_name, compiler_flags.join(" ")
+                @compiler.inspect
+            end
+        end
+    end
+
     def compile(f)
         o = f[0...-3] + "o"
-        puts "#{@compiler} -Icomponents -o #{o} -c #{f}"
-        system "#{@compiler} -Icomponents -o #{o} -c #{f}"
+        @compiler.compile f, o
     end
 
     def link(odir, objs)
-        puts "#{@compiler} -o #{odir}/#{@name} #{objs.join(" ")}"
-        system "#{@compiler} -o #{odir}/#{@name} #{objs.join(" ")}"
+        @compiler.link "#{odir}/#{@name}", objs
     end
 
     def build_bin
+        build_compiler_from_config
         Dir.chdir(@src) do
             mains = SourceFiles.get_in(".") do |f|
                 f.end_with? ".cpp"

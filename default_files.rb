@@ -51,6 +51,4 @@ class DefaultFiles
             DOC
         )
     end
-
-
 end

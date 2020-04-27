@@ -80,51 +80,33 @@ class WorkSpace
     end
 
     def run(args)
+        build unless File.exist? "./target/#{@name}"
         args = args.join " "
         puts "./target/#{@name} #{args}"
         system "./target/#{@name} #{args}"
     end
 
     def add(args)
-        args.each{|i|
+        args.each do |i|
             dir = @components
             filenames = i.split("/")
-            filenames.each {|filename|
+            filenames.each do |filename|
                 dir = dir + "/#{filename}"
                 unless Dir.exist? dir
                     FileUtils.mkdir dir 
-                    Dir.chdir(dir) {
+                    Dir.chdir(dir) do
                         puts "created " + Dir.pwd
                         create_working_files filename
-                    }
+                    end
                 end
-            }
-       }
+            end
+        end
     end
 
 private
     def create_working_files(filename)
         DefaultFiles.create_cpp filename
         DefaultFiles.create_hpp @name, filename
-    end
-
-    def extract_flags(content)
-        names = []
-        s = [] 
-        content.each_with_index do |c, i|
-            if c.start_with? "[["
-                names << c
-                s << i
-            end
-        end
-        e = s + [content.size]
-        flags = []
-        s.each_with_index do |c, i|
-            res = [names[i].match(/\[\[(.+)\]\]/)[1],
-                   content[(c+1)...e[i+1]]].flatten
-            flags << res
-        end
-        flags
     end
 
     def build_compiler_from_config

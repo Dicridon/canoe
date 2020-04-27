@@ -53,9 +53,7 @@ don't want external gems
 [[ looks great, while don't want any other redundent symbols
 
 ## Example
-Say we are developing a car project. so we type `canoe new car` to create it.
-
-We will have a project like below:
+Say we are developing a car project. so we type `canoe new car` to create it. We will have a project like below:
 ```
 car
   |----config
@@ -66,7 +64,7 @@ car
   |----target
   |----third-party
 ```
-now we want to add a component `engine` to this project, so we type `canoe add engine`, and our project would be:
+Now we want to add a component `engine` to this project, so we type `canoe add engine`, and our project would be:
 ```
 car
   |----config
@@ -81,9 +79,9 @@ car
   |----third-party
 ```
 
-to use classes and funcitons in `eninge`, we just need to include `engine/engine.hpp` in other source files(canoe adds ./components to include path).
+To use classes and funcitons in `eninge`, we just need to include `engine/engine.hpp` in other source files(canoe adds `./components` to include path).
 
-after some coding, we want to run this project for a test, so we just need to type `canoe build && canoe run`, canoe would build this project and run the executable binary for you. And the project would be:
+After some coding, we want to run this project for a test, so we just need to type `canoe build && canoe run`, canoe would build this project and run the executable binary for you. And the project would be:
 ```
 car
   |----config

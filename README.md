@@ -102,6 +102,9 @@ car
 
 
 ## Change log
+- v0.2: 
+    - new feature: 
+        - TODO: canoe now behaves like `make`: only modified files would be compiled!
 - v0.1: basic commands `canoe new`, `canoe build`, `canoe clean`, `canoe run`, `canoe add` are available for building executable binary project. 
     - Roadmap
         - third-party libs management should be added

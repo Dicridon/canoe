@@ -1,0 +1,2 @@
+#!/bin/bash
+ruby /usr/local/bin/.canoe/main.rb $@

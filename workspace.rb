@@ -27,6 +27,8 @@ class WorkSpace
 
                 canoe add tada: add a folder named tada under workspace/components,
                                 two files tada.hpp and tada.cpp would be craeted and intialized
+                
+                canoe verion: version information
 
             new project_name [mode]:
                 create a new project with project_name.
@@ -49,6 +51,9 @@ class WorkSpace
 
             help:
                 show this help message
+
+            verion: 
+                display version information
 
             @author: written by XIONG Ziwei, ICT, CAS
             @contact: noahxiong@outlook.com

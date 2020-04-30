@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 DIR="/usr/local/bin"
 BIN="/usr/local/bin/canoe"
 DATA="/usr/local/bin/.canoe"
@@ -8,13 +8,11 @@ function hello {
 }
 
 function install_canoe {
-    echo "ln -s $(pwd) $DIR/.canoe"
     ln -s $(pwd) $DIR/.canoe
     if [[ $? -eq 1 ]]; then
         return 1
     fi
-    echo "cp $DIR/.canoe/canoe $DIR"
-    cp $DIR/.canoe/canoe $DIR
+    cp $DIR/.canoe/scripts/canoe.bash $BIN
     if [[ $? -eq 1 ]]; then
         return 1
     fi

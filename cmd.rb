@@ -9,7 +9,7 @@ class CmdParser
 
     def parse(args)
         if args.size < 1 
-            abort_on_err "please give one command among #{@options}"
+            abort_on_err "please give one command among #{@options.join(', ')}"
         end
 
         unless OPTIONS.include?(args[0])
@@ -37,20 +37,18 @@ private
         if args.size < 1
             abort_on_err "not enough arguments to canoe new"
         end
-
-        name = args[0]
-        if args[1] == nil
-            WorkSpace.new(name, :bin).new
-        elsif args[1].start_with?("--")
-            mode = args[1][2..]
-            if mode == "bin" || mode == "lib"
-                WorkSpace.new(name, mode.to_sym).new
-                return
+        abort_on_err("too many args to 'new'") if args.length > 2
+        name, mode = nil, "bin"
+        args.each do |arg|
+            case arg
+            when '--bin', '--lib'
+                mode = arg[2..]
+            else
+                name = arg
             end
-            abort_on_err "unknown option #{args[1]}"
-        else
-            abort_on_err "unknown option #{args[1]}"
         end
+        abort_on_err("please give a name to this project") unless name
+        WorkSpace.new(name, mode.to_sym).new
     end
 
     def parse_add(args)
@@ -75,6 +73,17 @@ private
     
     def parse_clean(args)
         get_current_workspace.clean
+    end
+
+    def parse_version(args)
+        puts <<~VER
+        v0.2 
+        For features in this version, please visit https://github.com/Dicridon/canoe
+        Currently, canoe can do below:
+            - project creation
+            - project auto build and run (works like Cargo for Rust)
+            - project structure management
+        VER
     end
     
     def parse_help(args)

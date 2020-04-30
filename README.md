@@ -1,6 +1,24 @@
 # Canoe
 canoe is a C/C++ project management tool, inspired by Cargo for Rust.
 
+# Prequisite
+Ruby 2.7.1 or above
+
+# Installation
+clone this repo:
+`git clone https://github.com/Dicridon/canoe.git`
+execute installation script
+`./install.bash`
+
+for autocomplete in commandline, 
+`./scripts/canoe-completion.bash`
+ 
+if you are using `zsh`, execute
+`./scripts/canoe-completion.zsh`
+
+# Uninstallation
+simply remove `.canoe` and `canoe` in `/usr/local/bin`
+
 ## Conventions
 The directory structure of a demo canoe project is as follow:
 ```

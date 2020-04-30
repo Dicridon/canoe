@@ -13,13 +13,11 @@ class WorkSpace
         info = <<~INFO
             canoe is a C/C++ project manager, inspired by Rust cargo.
             usage:
-                canoe new tada: create a project named tada in current directory
+                canoe new tada: create a project named 'tada' in current directory
                 
                 canoe build: compile current project (execute this command in project directory)
 
-                canoe generate: generate dependence relationship for each file, this may accelarate
-                                `canoe buid` command. It's recommanded to execute this command everytime
-                                headers are added or removed from any file.
+                canoe generate: generate dependency relationship and store it in '.canoe.deps'
                 
                 canoe run: compile and execute current project (execute this command in project directory)
                 
@@ -32,8 +30,13 @@ class WorkSpace
 
             new project_name [mode]:
                 create a new project with project_name.
-                In this project, three directories src, target and third-party will be generated in project directory.
-                in src, include and impl will be generated if [mode] is a lib, an extra main.cpp will be generated if [mode] is a bin
+                In this project, four directories obj, src, target and third-party will be generated in project directory.
+                in src, directory 'components' will be generated if [mode] is '--lib', an extra main.cpp will be generated if [mode] is '--bin'
+
+            generate: 
+                generate dependence relationship for each file, this may accelarate
+                `canoe buid` command. It's recommanded to execute this command everytime
+                headers are added or removed from any file.
 
             build [options]:
                 build current project, arguments in [options] will be passed to C++ compiler
@@ -46,7 +49,9 @@ class WorkSpace
 
             help:
                 show this help message
-            @author: XIONG Dicridon
+
+            @author: written by XIONG Ziwei, ICT, CAS
+            @contact: noahxiong@outlook.com
         INFO
         puts info
     end
@@ -54,7 +59,7 @@ class WorkSpace
 
     def initialize(name, mode)
         @name = name
-        @compiler = Compiler.new 'clang++', '-Icomponents'
+        @compiler = Compiler.new 'clang++', '-Isrc/components'
         @cwd = Dir.new(Dir.pwd)
         @workspace = "#{Dir.pwd}/#{@name}"
         @src = "#{@workspace}/src"
@@ -79,10 +84,10 @@ class WorkSpace
         puts "workspace #{@workspace} is created"
     end
 
-    def build
+    def build(args)
         deps = File.exist?('.canoe.deps') ? 
                            DepAnalyzer.read_from(@deps) :
-                           DepAnalyzer.new('./src').build_to_file(['./src', './components'], @deps)
+                           DepAnalyzer.new('./src').build_to_file(['./src', './src/components'], @deps)
         target = "./target/#{@name}"
         build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
         files = DepAnalyzer.compiling_filter(deps, build_time)
@@ -90,7 +95,7 @@ class WorkSpace
             puts "nothing to do, all up to date"
             return
         end
-        self.send "build_#{@mode.to_s}", files
+        self.send "build_#{@mode.to_s}", files, args 
     end
 
     def generate
@@ -102,7 +107,7 @@ class WorkSpace
     end
 
     def run(args)
-        build
+        build args
         args = args.join " "
         puts "./target/#{@name} #{args}"
         system "./target/#{@name} #{args}"
@@ -131,11 +136,11 @@ private
         DefaultFiles.create_hpp @name, filename
     end
 
-    def build_compiler_from_config
+    def build_compiler_from_config(args)
         Dir.chdir(@workspace) do
             flags = ConfigReader.extract_flags "config"
             compiler_name = ""
-            compiler_flags = ["-Isrc/components"]
+            compiler_flags = ["-Isrc/components"] + args
             flags.each do |pair|
                 if pair[0] == "compiler"
                     compiler_name = pair[1]
@@ -159,35 +164,11 @@ private
         @compiler.link "#{odir}/#{@name}", objs
     end
 
-    def build_components
-        Dir.chdir(@src) do
-            files = SourceFiles.get_all("./components") do |f|
-                f.end_with? ".cpp"
-            end
-            files.each do |f|
-                o = "./obj/" + f.split("/")[-1][0...-3] + "o"
-                compile f, o
-            end
-        end
-    end
-
-    def build_mains
-        Dir.chdir(@src) do
-            mains = SourceFiles.get_in(".") do |f|
-                f.end_with? ".cpp"
-            end
-            mains.each do |f|
-                o = "../obj/" + f.split("/")[-1][0...-3] + "o"
-                compile f, o
-            end
-        end
-    end
-
-    def build_bin(files)
-        build_compiler_from_config
+    def build_bin(files, args)
+        build_compiler_from_config args
         files.each do |f|
-                o = "./obj/" + f.split("/")[-1][0...-3] + "o"
-                compile f, o
+            o = "./obj/" + f.split("/")[-1][0...-3] + "o"
+            compile f, o
         end
         link('./target', Dir.glob("obj/*.o")) unless files.empty?
     end

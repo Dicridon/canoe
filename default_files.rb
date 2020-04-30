@@ -13,7 +13,13 @@ class DefaultFiles
                 clang++
 
                 [[opt-flags]]
-                -O0
+                -O2
+
+                [[debug-flags]]
+                -g
+
+                [[std-flags]]
+                -std=c++17
 
             CONFIG
         )

@@ -60,7 +60,7 @@ private
    end
     
     def parse_build(args)
-        get_current_workspace.build
+        get_current_workspace.build args
     end
 
     def parse_generate(args)

@@ -3,8 +3,11 @@ require_relative 'source_files'
 require_relative 'compiler'
 require_relative 'config_reader'
 require_relative 'default_files'
+require_relative 'err'
+require_relative 'dependence'
 
 class WorkSpace
+    include Err
     attr_reader :name, :cwd
     def self.help
         info = <<~INFO
@@ -13,6 +16,10 @@ class WorkSpace
                 canoe new tada: create a project named tada in current directory
                 
                 canoe build: compile current project (execute this command in project directory)
+
+                canoe generate: generate dependence relationship for each file, this may accelarate
+                                `canoe buid` command. It's recommanded to execute this command everytime
+                                headers are added or removed from any file.
                 
                 canoe run: compile and execute current project (execute this command in project directory)
                 
@@ -55,6 +62,7 @@ class WorkSpace
         @third = "#{@workspace}/third-party"
         @target = "#{@workspace}/target"
         @mode = mode
+        @deps = '.canoe.deps'
     end
 
     def new
@@ -72,7 +80,21 @@ class WorkSpace
     end
 
     def build
-        self.send "build_#{@mode.to_s}"
+        deps = File.exist?('.canoe.deps') ? 
+                           DepAnalyzer.read_from(@deps) :
+                           DepAnalyzer.new('./src').build_to_file(['./src', './components'], @deps)
+        target = "./target/#{@name}"
+        build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
+        files = DepAnalyzer.compiling_filter(deps, build_time)
+        if files.empty?
+            puts "nothing to do, all up to date"
+            return
+        end
+        self.send "build_#{@mode.to_s}", files
+    end
+
+    def generate
+        DepAnalyzer.new('./src').build_to_file ['./src', './src/components'], @deps
     end
 
     def clean
@@ -80,7 +102,7 @@ class WorkSpace
     end
 
     def run(args)
-        build unless File.exist? "./target/#{@name}"
+        build
         args = args.join " "
         puts "./target/#{@name} #{args}"
         system "./target/#{@name} #{args}"
@@ -113,10 +135,11 @@ private
         Dir.chdir(@workspace) do
             flags = ConfigReader.extract_flags "config"
             compiler_name = ""
-            compiler_flags = ["-Icomponents"]
+            compiler_flags = ["-Isrc/components"]
             flags.each do |pair|
                 if pair[0] == "compiler"
                     compiler_name = pair[1]
+                    abort_on_err "compiler #{compiler_name} not found in /usr/bin" unless File.exist? "/usr/bin/#{compiler_name}"
                 elsif pair[0].end_with? "flags"
                     compiler_flags << pair[1..]
                 else
@@ -142,7 +165,7 @@ private
                 f.end_with? ".cpp"
             end
             files.each do |f|
-                o = "../obj/" + f.split("/")[-1][0...-3] + "o"
+                o = "./obj/" + f.split("/")[-1][0...-3] + "o"
                 compile f, o
             end
         end
@@ -160,11 +183,13 @@ private
         end
     end
 
-    def build_bin
+    def build_bin(files)
         build_compiler_from_config
-        build_components
-        build_mains
-        link('./target', Dir.glob("obj/*.o"))
+        files.each do |f|
+                o = "./obj/" + f.split("/")[-1][0...-3] + "o"
+                compile f, o
+        end
+        link('./target', Dir.glob("obj/*.o")) unless files.empty?
     end
 
     def build_lib

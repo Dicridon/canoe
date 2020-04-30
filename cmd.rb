@@ -1,6 +1,8 @@
 require_relative "workspace"
+require_relative "err"
 
 class CmdParser
+    include Err
     def initialize(options)
         @options = options 
     end
@@ -62,6 +64,10 @@ private
     def parse_build(args)
         get_current_workspace.build
     end
+
+    def parse_generate(args)
+        get_current_workspace.generate
+    end
     
     def parse_run(args)
         get_current_workspace.run args
@@ -73,13 +79,5 @@ private
     
     def parse_help(args)
         WorkSpace.help
-    end
-
-    def abort_on_err(err)
-        abort <<~ERR
-            Error:
-                #{err}
-            try 'canoe help' for more information
-        ERR
     end
 end

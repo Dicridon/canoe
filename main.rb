@@ -1,7 +1,7 @@
 require_relative "workspace"
 require_relative "cmd"
 require_relative "source_files"
-OPTIONS = ["new", "build", "run", "clean", "help", "add"]
+OPTIONS = ["new", "build", "run", "clean", "help", "add", "generate"]
 
 cmd = CmdParser.new OPTIONS
 

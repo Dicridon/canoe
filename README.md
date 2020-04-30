@@ -103,8 +103,15 @@ car
 
 ## Change log
 - v0.2: 
+    - new command `generate`
+      - this command would create a `.canoe.deps` file, and `canoe build` command later may selectively compile some modified files according to `.canoe.deps`
     - new feature: 
-        - TODO: canoe now behaves like `make`: only modified files would be compiled!
+        - canoe now behaves like `make`: only modified files would be compiled!
+        - you do not need to write anything like `Makefile`, canoe would analyze the dependency relationships of all files in one project and generate `.canoe.deps` to describe them.
+        - third-party library dependency analyze is **NOT** added, if you realy need external library not presented as `.so` files, you may add dependency relationship in `.canoe.deps` file.
+    - Roadmap
+      - third-party dependency analyze should be added
+      - (optional) allow users to specify their desired project layouts
 - v0.1: basic commands `canoe new`, `canoe build`, `canoe clean`, `canoe run`, `canoe add` are available for building executable binary project. 
     - Roadmap
         - third-party libs management should be added

@@ -19,7 +19,7 @@ if you are using `zsh`, execute
 # Uninstallation
 simply remove `.canoe` and `canoe` in `/usr/local/bin`
 
-## Conventions
+# Conventions
 The directory structure of a demo canoe project is as follow:
 ```
 demo
@@ -50,7 +50,7 @@ demo
 
 `third-party`: external libraries are stored here.
 
-## Format of config file
+# Format of config file
 a config file looks like below
 ```
 [[name]]
@@ -61,16 +61,16 @@ value1 value2 value3
 value4 value5 value6 value7
 ```
 
-### Why not json
+## Why not json
 tired of curly-braces
 
-### Why not toml
+## Why not toml
 don't want external gems
 
-### Why this format
+## Why this format
 [[ looks great, while don't want any other redundent symbols
 
-## Example
+# Example
 Say we are developing a car project. so we type `canoe new car` to create it. We will have a project like below:
 ```
 car
@@ -119,7 +119,7 @@ car
 
 
 
-## Change log
+# Change log
 - v0.2: 
     - new command `generate`
       - this command would create a `.canoe.deps` file, and `canoe build` command later may selectively compile some modified files according to `.canoe.deps`

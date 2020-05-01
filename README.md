@@ -40,7 +40,7 @@ demo
 ```
 `demo`: all commands except `canoe new` should be executed under this directory.
 
-`config`: This files configures compilation flags.
+`config`: This file configures compilation flags.
 
 `obj`: compiled object files are stored here.
 

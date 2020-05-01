@@ -12,7 +12,7 @@ class CmdParser
             abort_on_err "please give one command among #{@options.join(', ')}"
         end
 
-        unless OPTIONS.include?(args[0])
+        unless @options.include?(args[0])
             abort_on_err "unknown command #{args[0]}"
         end
 
@@ -21,16 +21,14 @@ class CmdParser
 
 private
     def get_current_workspace
-        unless File.exists? ".canoe"
-            abort_on_err "not in a canoe workspace"
-        end
+        abort_on_err "not in a canoe workspace" unless File.exists? ".canoe"
 
         name = Dir.pwd.split("/")[-1]
         mode = File.exists?("src/main.cpp") ? :bin : :lib
 
-        Dir.chdir('..') {
+        Dir.chdir('..') do
             return WorkSpace.new(name, mode)
-        }
+        end
     end
 
     def parse_new(args)
@@ -77,12 +75,13 @@ private
 
     def parse_version(args)
         puts <<~VER
-        v0.2 
+        canoe v0.2
         For features in this version, please visit https://github.com/Dicridon/canoe
         Currently, canoe can do below:
             - project creation
             - project auto build and run (works like Cargo for Rust)
             - project structure management
+        by XIONG Ziwei
         VER
     end
     

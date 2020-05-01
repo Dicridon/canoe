@@ -147,10 +147,11 @@ private
             compiler_name = ""
             compiler_flags = ["-Isrc/components"] + args
             flags.each do |pair|
-                if pair[0] == "compiler"
+                case pair[0]
+                when "compiler"
                     compiler_name = pair[1]
                     abort_on_err "compiler #{compiler_name} not found in /usr/bin" unless File.exist? "/usr/bin/#{compiler_name}"
-                elsif pair[0].end_with? "flags"
+                when /.+-flags/
                     compiler_flags << pair[1..]
                 else
                     puts "unknown options #{pair[0]}"

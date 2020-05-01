@@ -1,20 +1,19 @@
 require_relative 'source_files'
+require_relative 'err'
 
 class DepAnalyzer
+    include Err
     def self.read_from(filename)
         File.open(filename, "r") do |f|
             ret = Hash.new []
-            f.each_line do |line|
+            f.each_with_index do |line, i|
                 entry = line.split(': ')
+                Err.abort_on_err("Bad .canoe.deps format, line #{i+1}") unless entry.length == 2
                 ret[entry[0]] = entry[1].split
             end            
             ret
         end
     end
-
-    # if header files included are not modified
-    # but corresponding cpp files are, this
-    # file needs no recompiling
 
     def self.compiling_filter(deps, time)
         files = [] 
@@ -79,7 +78,6 @@ public
         end
         @deps
     end
-
 
 private
     def get_all_headers(include_path, file)

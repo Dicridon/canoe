@@ -14,4 +14,6 @@ module Err
             try 'canoe help' for more information
         ERR
     end
+
+    module_function :warn_on_err, :abort_on_err
 end

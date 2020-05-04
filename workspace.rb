@@ -112,7 +112,7 @@ class WorkSpace
     end
 
     def run(args)
-        build args
+        build []
         args = args.join " "
         puts "./target/#{@name} #{args}"
         system "./target/#{@name} #{args}"

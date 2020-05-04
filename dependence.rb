@@ -15,16 +15,16 @@ class DepAnalyzer
         end
     end
 
-    def self.compiling_filter(deps, time)
+    def self.compiling_filter(deps, build_time)
         files = [] 
         deps.each do |k, v|
             next if k.end_with? '.hpp'
-            if file_modified_after(k, time)
+            if should_recompile?(k, build_time)
                 files << k
                 next
             end
             v.each do |f|
-                if mark(f, time, deps) || mark(f.sub('.hpp', '.cpp'), time, deps)
+                if mark(f, build_time, deps) || mark(f.sub('.hpp', '.cpp'), build_time, deps)
                     files << k
                     break
                 end
@@ -34,20 +34,26 @@ class DepAnalyzer
     end
 
 private
-    def self.mark(file, time, deps)
+    def self.mark(file, build_time, deps)
         return false unless File.exists? file
-        if file_modified_after(file, time)
+        if should_recompile?(file, build_time)
             return true
         else
             deps[file].each do |f|
-                return true if mark(f, time, deps)
+                return true if mark(f, build_time, deps)
             end
         end
         false
     end
 
-    def self.file_modified_after(file, time) 
-        File.mtime(file) > time
+    def self.should_recompile?(file, build_time) 
+        judge = build_time
+        if build_time == Time.new(0)
+            objfile = "./obj/#{File.basename(file, ".*")}.o"
+            return true unless File.exists? objfile
+            judge = File.mtime(objfile)
+        end
+        File.mtime(file) > judge
     end
 
 public

@@ -37,6 +37,19 @@ class DefaultFiles
         )
     end
 
+    def self.create_emacs_dir_local(path)
+        open_file_and_write(
+            "#{path}/.dir-locals.el",
+            <<~DOC
+                ((nil . ((company-clang-arguments . ("-I./src/components/"
+                                                     "-I./components/"))))
+                 (nil . ((company-c-headers-path-user . ("./src/components/"
+                                         "./components/")))))
+            DOC
+        )
+
+    end
+
     def self.create_cpp(filename)
         open_file_and_write(
             "#{filename}.cpp", 

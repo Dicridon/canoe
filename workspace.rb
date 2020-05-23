@@ -83,6 +83,7 @@ class WorkSpace
         DefaultFiles.create_main @src if @mode == :bin
         File.new("#{@workspace}/.canoe", "w")
         DefaultFiles.create_config @workspace
+        DefaultFiles.create_emacs_dir_local @workspace
 
         Dir.mkdir(@third)
         Dir.mkdir(@target)

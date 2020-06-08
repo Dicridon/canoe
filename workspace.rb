@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'open3'
 require_relative 'source_files'
 require_relative 'compiler'
 require_relative 'config_reader'
@@ -116,7 +117,7 @@ class WorkSpace
         build []
         args = args.join " "
         puts "./target/#{@name} #{args}"
-        system "./target/#{@name} #{args}"
+        exec "./target/#{@name} #{args}"
     end
 
     def add(args)
@@ -167,7 +168,11 @@ private
     end
 
     def link(odir, objs)
-        system "#{@compiler} -o #{odir}/#{@name} #{objs.join(" ")}"
+        status = system "#{@compiler} -o #{odir}/#{@name} #{objs.join(" ")}"
+        unless status
+            puts "compilation failed"
+            return
+        end
         @compiler.link "#{odir}/#{@name}", objs
     end
 

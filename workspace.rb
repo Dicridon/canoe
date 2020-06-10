@@ -129,13 +129,15 @@ class WorkSpace
         args.each do |i|
             dir = @components
             filenames = i.split("/")
+            prefix = []
             filenames.each do |filename|
-                dir = dir + "/#{filename}"
+                dir += "/#{filename}"
+                prefix << filename
                 unless Dir.exist? dir
                     FileUtils.mkdir dir 
                     Dir.chdir(dir) do
                         puts "created " + Dir.pwd
-                        create_working_files filename
+                        create_working_files prefix.join('__'), filename
                     end
                 end
             end
@@ -143,9 +145,9 @@ class WorkSpace
     end
 
 private
-    def create_working_files(filename)
+    def create_working_files(prefix, filename)
         DefaultFiles.create_cpp filename
-        DefaultFiles.create_hpp @name, filename
+        DefaultFiles.create_hpp @name, prefix, filename
     end
 
     def build_compiler_from_config(args)

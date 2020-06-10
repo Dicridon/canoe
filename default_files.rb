@@ -59,12 +59,12 @@ class DefaultFiles
         )
     end
 
-    def self.create_hpp(workspace, filename)
+    def self.create_hpp(workspace, prefix, filename)
         open_file_and_write(
             "#{filename}.hpp",
             <<~DOC
-                #ifndef __#{workspace.upcase}__#{filename.upcase}__
-                #define __#{workspace.upcase}__#{filename.upcase}__
+                #ifndef __#{workspace.upcase}__#{prefix.upcase}__#{filename.upcase}__
+                #define __#{workspace.upcase}__#{prefix.upcase}__#{filename.upcase}__
 
                 #endif
             DOC

@@ -7,20 +7,18 @@ class DefaultFiles
 
     def self.create_config(path)
         open_file_and_write(
-            "#{path}/config", 
+            "#{path}/config.json", 
             <<~CONFIG
-                [[compiler]]
-                clang++
-
-                [[opt-flags]]
-                -O2
-
-                [[debug-flags]]
-                -g
-
-                [[std-flags]]
-                -std=c++17
-
+                {
+                    "compiler": "clang++",
+                    "header-suffix": "hpp",
+                    "source-suffix": "cpp",
+                    "flags": {
+                        "opt": "-O2",
+                        "debug": "-g",
+                        "std": "-std=c++17"
+                    }
+                }
             CONFIG
         )
     end

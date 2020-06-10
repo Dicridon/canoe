@@ -96,6 +96,7 @@ class WorkSpace
         puts "workspace #{@workspace} is created"
     end
 
+    # args are commandline parameters passed to `canoe build`    
     def build(args)
         deps = File.exist?('.canoe.deps') ? 
                            DepAnalyzer.read_from(@deps) :
@@ -152,20 +153,22 @@ private
 
     def build_compiler_from_config(args)
         Dir.chdir(@workspace) do
-            flags = ConfigReader.extract_flags "config"
-            compiler_name = ""
-            compiler_flags = ["-Isrc/components"] + args
-            flags.each do |pair|
-                case pair[0]
-                when "compiler"
-                    compiler_name = pair[1]
-                    abort_on_err "compiler #{compiler_name} not found in /usr/bin" unless File.exist? "/usr/bin/#{compiler_name}"
-                when /.+-flags/
-                    compiler_flags << pair[1..]
-                else
-                    puts "unknown options #{pair[0]}"
+            flags = ConfigReader.extract_flags "config.json"
+            compiler_name = flags['compiler'] ? flags['compiler'] : "clang++"
+            abort_on_err "compiler #{compiler_name} not found" unless File.exists?("/usr/bin/#{compiler_name}")
+            compiler_flags = ['-Isrc/components'] + args
+            if opts = flags['flags'] 
+                opts.each do |k, v|
+                    if v.instance_of? Array
+                        v.each do |o|
+                            compiler_flags << o
+                        end
+                    else
+                        compiler_flags << v
+                    end
                 end
             end
+            puts "flags to compiler #{compiler_flags}"
             @compiler = Compiler.new compiler_name, compiler_flags.join(" ")
         end
     end

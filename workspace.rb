@@ -31,10 +31,13 @@ class WorkSpace
                 
                 canoe verion: version information
 
-            new project_name [mode]:
+            new project_name [mode] [suffixes]:
                 create a new project with project_name.
                 In this project, four directories obj, src, target and third-party will be generated in project directory.
                 in src, directory 'components' will be generated if [mode] is '--lib', an extra main.cpp will be generated if [mode] is '--bin'
+
+                [mode]: --lib for a library and --bin for executable binaries
+                [suffixes]: should be in 'source_suffix:header_suffix" format, notice the ':' between two suffixes
 
             generate: 
                 generate dependence relationship for each file, this may accelarate
@@ -142,7 +145,7 @@ class WorkSpace
                     FileUtils.mkdir dir 
                     Dir.chdir(dir) do
                         puts "created " + Dir.pwd
-                        create_working_files prefix.join('__'), filename
+                        create_working_files prefix.join('__'), filename, source_suffix, header_suffix
                     end
                 end
             end
@@ -151,8 +154,8 @@ class WorkSpace
 
 private
     def create_working_files(prefix, filename)
-        DefaultFiles.create_cpp filename
-        DefaultFiles.create_hpp @name, prefix, filename
+        DefaultFiles.create_cpp filename, @source_suffix, @header_suffix
+        DefaultFiles.create_hpp @name, prefix, filename, @header_suffix
     end
 
     def build_compiler_from_config(args)

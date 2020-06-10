@@ -120,18 +120,26 @@ car
 
 
 # Change log
+- v0.2.1:
+  - new feature:
+    - config file is now in json format, enjoy jsons!
+    - users may specify desired file suffixes using option `--suffix=source_suffix:header_suffix`, please notice the `:` between two suffixes
+  - Roadmap
+    - third-party dependency analyze should be added
+    - (optional) allow users to specify their desired project layouts
 - v0.2: 
-    - new command `generate`
-      - this command would create a `.canoe.deps` file, and `canoe build` command later may selectively compile some modified files according to `.canoe.deps`
-    - new feature: 
-        - canoe now behaves like `make`: only modified files would be compiled!
-        - you do not need to write anything like `Makefile`, canoe would analyze the dependency relationships of all files in one project and generate `.canoe.deps` to describe them.
-        - third-party library dependency analyze is **NOT** added, if you realy need external library not presented as `.so` files, you may add dependency relationship in `.canoe.deps` file.
-    - Roadmap
-      - third-party dependency analyze should be added
-      - (optional) allow users to specify their desired project layouts
+  - new command `generate`
+    - this command would create a `.canoe.deps` file, and `canoe build` command later may selectively compile some modified files according to `.canoe.deps`
+  - new feature: 
+      - canoe now behaves like `make`: only modified files would be compiled!
+      - you do not need to write anything like `Makefile`, canoe would analyze the dependency relationships of all files in one project and generate `.canoe.deps` to describe them.
+      - third-party library dependency analyze is **NOT** added, if you realy need external library not presented as `.so` files, you may add dependency relationship in `.canoe.deps` file.
+  - Roadmap
+    - third-party dependency analyze should be added
+    - (optional) allow users to specify their desired project layouts
+
 - v0.1: basic commands `canoe new`, `canoe build`, `canoe clean`, `canoe run`, `canoe add` are available for building executable binary project. 
-    - Roadmap
-        - third-party libs management should be added
-        - canoe should compile only modified files, instead of recompiling the whole project
-        - allow user to specify their desired project layout
+  - Roadmap
+      - third-party libs management should be added
+      - canoe should compile only modified files, instead of recompiling the whole project
+      - allow user to specify their desired project layout

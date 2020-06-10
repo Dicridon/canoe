@@ -63,7 +63,7 @@ class WorkSpace
     end
 
 
-    def initialize(name, mode)
+    def initialize(name, mode, src_suffix='cpp', hdr_suffix='hpp')
         @name = name
         @compiler = Compiler.new 'clang++', '-Isrc/components'
         @cwd = Dir.new(Dir.pwd)
@@ -79,6 +79,9 @@ class WorkSpace
         @src_prefix = './src/'
         @components_prefix = './src/components/'
         @obj_prefix = './obj/'
+
+        @source_suffix = src_suffix
+        @header_suffix = hdr_suffix
     end
 
     def new
@@ -86,7 +89,7 @@ class WorkSpace
         Dir.mkdir(@src)
         Dir.mkdir(@components)
         Dir.mkdir("#{@workspace}/obj")
-        DefaultFiles.create_main @src if @mode == :bin
+        DefaultFiles.create_main(@src, @source_suffix) if @mode == :bin
         File.new("#{@workspace}/.canoe", "w")
         DefaultFiles.create_config @workspace
         DefaultFiles.create_emacs_dir_local @workspace
@@ -103,7 +106,8 @@ class WorkSpace
                            DepAnalyzer.new('./src').build_to_file(['./src', './src/components'], @deps)
         target = "./target/#{@name}"
         build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
-        files = DepAnalyzer.compiling_filter(deps, build_time)
+        files = DepAnalyzer.compiling_filter(deps, build_time, @source_suffix, @header_suffix)
+        puts "build got files: #{files}"
         if files.empty?
             puts "nothing to do, all up to date"
             return
@@ -159,12 +163,15 @@ private
             compiler_flags = ['-Isrc/components'] + args
             if opts = flags['flags'] 
                 opts.each do |k, v|
-                    if v.instance_of? Array
+                    case v
+                    when String
+                        compiler_flags << v
+                    when Array
                         v.each do |o|
                             compiler_flags << o
                         end
                     else
-                        compiler_flags << v
+                        abort_on_err "unknown options in config.json, #{v}"
                     end
                 end
             end
@@ -192,7 +199,8 @@ private
         srcs = files - comps
         srcs.each do |f|
             puts "compiling #{f}"
-            o = @obj_prefix + f.split("/")[-1][0...-3] + 'o'
+            fname = f.split("/")[1]
+            o = @obj_prefix + fname.delete_suffix(File.extname(fname)) + '.o'
             compile f, o
         end
         comps.each do |f|

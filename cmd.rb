@@ -37,16 +37,19 @@ private
         end
         abort_on_err("too many args to 'new'") if args.length > 2
         name, mode = nil, "bin"
+        suffixes = ["cpp", "hpp"]
         args.each do |arg|
             case arg
             when '--bin', '--lib'
                 mode = arg[2..]
+            when /--suffix=(\w+)\:(\w+)/
+                suffixes[0], suffixes[1] = $1, $2
             else
-                name = arg
+                name = arg unless name
             end
         end
         abort_on_err("please give a name to this project") unless name
-        WorkSpace.new(name, mode.to_sym).new
+        WorkSpace.new(name, mode.to_sym, suffixes[0], suffixes[1]).new
     end
 
     def parse_add(args)

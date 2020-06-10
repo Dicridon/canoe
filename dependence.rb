@@ -15,16 +15,16 @@ class DepAnalyzer
         end
     end
 
-    def self.compiling_filter(deps, build_time)
+    def self.compiling_filter(deps, build_time, src_sfx='cpp', hdr_sfx='hpp')
         files = [] 
         deps.each do |k, v|
-            next if k.end_with? '.hpp'
+            next if k.end_with? ".#{hdr_sfx}"
             if should_recompile?(k, build_time)
                 files << k
                 next
             end
             v.each do |f|
-                if mark(f, build_time, deps) || mark(f.sub('.hpp', '.cpp'), build_time, deps)
+                if mark(f, build_time, deps) || mark(f.sub(".#{hdr_sfx}", ".#{src_sfx}"), build_time, deps)
                     files << k
                     break
                 end
@@ -57,19 +57,21 @@ private
     end
 
 public
-    def initialize(dir)
+    def initialize(dir, src_sfx='cpp', hdr_sfx='hpp')
         @dir = dir
         @deps = Hash.new []
+        @source_suffix = src_sfx
+        @header_suffix = hdr_sfx
     end
 
     def build_dependence(include_path)
         files = SourceFiles.get_all(@dir) do |f|
-            f.end_with? "pp"
+            f.end_with?(".#{@source_suffix}") || f.end_with?("#{@header_suffix}")
         end
 
         @deps = Hash.new []
         files.each do |fname|
-            @deps[fname] = get_all_headers include_path, fname
+            @deps[fname] = get_all_headers include_path, fname, @header_suffix
         end
 
         @deps
@@ -86,15 +88,15 @@ public
     end
 
 private
-    def get_all_headers(include_path, file)
+    def get_all_headers(include_path, file, suffix='hpp')
         File.open(file, "r") do |f|
             ret = []
-            if file.end_with?('.cpp')
-                header = file.sub('.cpp', '.hpp')
+            if file.end_with?(".#{@source_suffix}")
+                header = file.sub(".#{@source_suffix}", ".#{@header_suffix}")
                 ret += [header] if File.exists?(header)
             end
             f.each_line do |line|
-                if mat = line.match(/include "(.+\.hpp)"/)
+                if mat = line.match(/include "(.+\.#{suffix})"/)
                     include_path.each do |path|
                         dep = "#{path}/#{mat[1]}"
                         ret += [dep] if File.exists? dep

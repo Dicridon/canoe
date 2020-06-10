@@ -23,9 +23,9 @@ class DefaultFiles
         )
     end
 
-    def self.create_main(path)
+    def self.create_main(path, suffix='cpp')
         open_file_and_write(
-            "#{path}/main.cpp",
+            "#{path}/main.#{suffix}",
             <<~DOC
                 #include <iostream>
                 int main(int argc, char *argv[]) {
@@ -48,18 +48,18 @@ class DefaultFiles
 
     end
 
-    def self.create_cpp(filename)
+    def self.create_cpp(filename, src_sfx='cpp', hdr_sfx='hpp')
         open_file_and_write(
-            "#{filename}.cpp", 
+            "#{filename}.#{src_sfx}", 
             <<~DOC
-                #include "#{filename}.hpp"
+                #include "#{filename}.#{hdr_sfx}"
             DOC
         )
     end
 
-    def self.create_hpp(workspace, prefix, filename)
+    def self.create_hpp(workspace, prefix, filename, hdr_sfx='hpp')
         open_file_and_write(
-            "#{filename}.hpp",
+            "#{filename}.#{hdr_sfx}",
             <<~DOC
                 #ifndef __#{workspace.upcase}__#{prefix.upcase}__#{filename.upcase}__
                 #define __#{workspace.upcase}__#{prefix.upcase}__#{filename.upcase}__

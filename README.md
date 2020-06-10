@@ -51,25 +51,22 @@ demo
 `third-party`: external libraries are stored here.
 
 # Format of config file
-a config file looks like below
+a config file is a json file
 ```
-[[name]]
-values
-
-[[another-name]]
-value1 value2 value3
-value4 value5 value6 value7
+{
+  "compiler": "clang++",
+  "header-suffix": "hpp",
+  "source-suffix": "cpp",
+  "flags": {
+    "opt": "-O2",
+    "debug": "-g",
+    "std": "-std=c++17"
+  }
+}
 ```
-
-## Why not json
-tired of curly-braces
-
-## Why not toml
-don't want external gems
-
-## Why this format
-[[ looks great, while don't want any other redundent symbols
-
+`compiler` designates desired compiler
+`header-suffix` and `source-suffix` designate desired source file suffix and header file suffix instead of 'cpp' and 'hpp' accordingly
+`flags` are all the flags passed to the compiler, users may freely add new flags into this field and give them names, just like `opt` for `-O2`, so users may classify compile flags to avoid messing up flags
 # Example
 Say we are developing a car project. so we type `canoe new car` to create it. We will have a project like below:
 ```

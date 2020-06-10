@@ -70,10 +70,15 @@ class WorkSpace
         @workspace = "#{Dir.pwd}/#{@name}"
         @src = "#{@workspace}/src"
         @components = "#{@src}/components"
+        @obj = "#{@workspace}/obj"
         @third = "#{@workspace}/third-party"
         @target = "#{@workspace}/target"
         @mode = mode
         @deps = '.canoe.deps'
+
+        @src_prefix = './src/'
+        @components_prefix = './src/components/'
+        @obj_prefix = './obj/'
     end
 
     def new
@@ -178,8 +183,16 @@ private
 
     def build_bin(files, args)
         build_compiler_from_config args
-        files.each do |f|
-            o = "./obj/" + f.split("/")[-1][0...-3] + "o"
+        comps = files.select {|f| f.start_with? @components_prefix}
+        srcs = files - comps
+        srcs.each do |f|
+            puts "compiling #{f}"
+            o = @obj_prefix + f.split("/")[-1][0...-3] + 'o'
+            compile f, o
+        end
+        comps.each do |f|
+            puts "compiling #{f}"
+            o = @obj_prefix + f.delete_suffix(File.extname(f))[@components_prefix.length..].gsub('/', '_') + '.o'
             compile f, o
         end
         link('./target', Dir.glob("obj/*.o")) unless files.empty?

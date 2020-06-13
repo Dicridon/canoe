@@ -65,8 +65,11 @@ a config file is a json file
 }
 ```
 `compiler` designates desired compiler
+
 `header-suffix` and `source-suffix` designate desired source file suffix and header file suffix instead of 'cpp' and 'hpp' accordingly
+
 `flags` are all the flags passed to the compiler, users may freely add new flags into this field and give them names, just like `opt` for `-O2`, so users may classify compile flags to avoid messing up flags
+
 # Example
 Say we are developing a car project. so we type `canoe new car` to create it. We will have a project like below:
 ```

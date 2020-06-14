@@ -5,14 +5,14 @@ class DefaultFiles
         }
     end
 
-    def self.create_config(path)
+    def self.create_config(path, src_sfx='cpp', hdr_sfx='hpp')
         open_file_and_write(
             "#{path}/config.json", 
             <<~CONFIG
                 {
                     "compiler": "clang++",
-                    "header-suffix": "hpp",
-                    "source-suffix": "cpp",
+                    "header-suffix": "#{hdr_sfx}",
+                    "source-suffix": "#{src_sfx}",
                     "flags": {
                         "opt": "-O2",
                         "debug": "-g",

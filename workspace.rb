@@ -94,13 +94,13 @@ class WorkSpace
         Dir.mkdir("#{@workspace}/obj")
         DefaultFiles.create_main(@src, @source_suffix) if @mode == :bin
         File.new("#{@workspace}/.canoe", "w")
-        DefaultFiles.create_config @workspace
+        DefaultFiles.create_config @workspace, @source_suffix, @header_suffix
         DefaultFiles.create_emacs_dir_local @workspace
 
         Dir.mkdir(@third)
         Dir.mkdir(@target)
         puts "workspace #{@workspace} is created"
-    end
+     end
 
     # args are commandline parameters passed to `canoe build`    
     def build(args)
@@ -110,7 +110,7 @@ class WorkSpace
         target = "./target/#{@name}"
         build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
         files = DepAnalyzer.compiling_filter(deps, build_time, @source_suffix, @header_suffix)
-        puts "build got files: #{files}"
+        # puts "build got files: #{files}"
         if files.empty?
             puts "nothing to do, all up to date"
             return
@@ -119,7 +119,11 @@ class WorkSpace
     end
 
     def generate
-        DepAnalyzer.new('./src').build_to_file ['./src', './src/components'], @deps
+        DepAnalyzer.new('./src', @source_suffix, @header_suffix).build_to_file ['./src', './src/components'], @deps
+    end
+
+    def update
+        generate
     end
 
     def clean
@@ -145,7 +149,7 @@ class WorkSpace
                     FileUtils.mkdir dir 
                     Dir.chdir(dir) do
                         puts "created " + Dir.pwd
-                        create_working_files prefix.join('__'), filename, source_suffix, header_suffix
+                        create_working_files prefix.join('__'), filename
                     end
                 end
             end
@@ -202,7 +206,7 @@ private
         srcs = files - comps
         srcs.each do |f|
             puts "compiling #{f}"
-            fname = f.split("/")[1]
+            fname = f.split("/")[-1]
             o = @obj_prefix + fname.delete_suffix(File.extname(fname)) + '.o'
             compile f, o
         end

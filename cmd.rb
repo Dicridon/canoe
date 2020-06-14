@@ -1,5 +1,6 @@
 require_relative "workspace"
 require_relative "err"
+require_relative "config_reader"
 
 class CmdParser
     include Err
@@ -22,12 +23,16 @@ class CmdParser
 private
     def get_current_workspace
         abort_on_err "not in a canoe workspace" unless File.exists? ".canoe"
+        config = ConfigReader.extract_flags("config.json")
+
+        src_sfx = config["source-suffix"] ? config["source-suffix"] : "cpp"
+        hdr_sfx = config["header-suffix"] ? config["header-suffix"] : "hpp"
 
         name = Dir.pwd.split("/")[-1]
-        mode = File.exists?("src/main.cpp") ? :bin : :lib
+        mode = File.exists?("src/main.#{src_sfx}") ? :bin : :lib
 
         Dir.chdir('..') do
-            return WorkSpace.new(name, mode)
+            return WorkSpace.new(name, mode, src_sfx, hdr_sfx)
         end
     end
 
@@ -78,7 +83,7 @@ private
 
     def parse_version(args)
         puts <<~VER
-        canoe v0.2
+        canoe v0.2.1
         For features in this version, please visit https://github.com/Dicridon/canoe
         Currently, canoe can do below:
             - project creation
@@ -90,5 +95,9 @@ private
     
     def parse_help(args)
         WorkSpace.help
+    end
+
+    def parse_update(args)
+        get_current_workspace.update
     end
 end

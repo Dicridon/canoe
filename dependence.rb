@@ -66,7 +66,7 @@ public
 
     def build_dependence(include_path)
         files = SourceFiles.get_all(@dir) do |f|
-            f.end_with?(".#{@source_suffix}") || f.end_with?("#{@header_suffix}")
+            f.end_with?(".#{@source_suffix}") || f.end_with?(".#{@header_suffix}")
         end
 
         @deps = Hash.new []

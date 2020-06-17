@@ -120,6 +120,8 @@ car
 
 
 # Change log
+- v0.2.2:
+  - new command `dep` to see file dependencies
 - v0.2.1:
   - new feature:
     - config file is now in json format, enjoy jsons!

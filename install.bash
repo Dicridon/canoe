@@ -3,10 +3,6 @@ DIR="/usr/local/bin"
 BIN="/usr/local/bin/canoe"
 DATA="/usr/local/bin/.canoe"
 
-function hello {
-    echo "hello"
-}
-
 function install_canoe {
     ln -s $(pwd) $DIR/.canoe
     if [[ $? -eq 1 ]]; then

@@ -14,13 +14,14 @@ class Compiler
   end
 
   def compile(src, out)
-    puts "#{name} -o #{out} #{flags} -c #{src}"
-    system "#{name} -o #{out} #{flags} -c #{src}"
+    puts "#{name} -o #{out} #{flags_as_str} -c #{src}"
+    system "#{name} -o #{out} #{flags_as_str} -c #{src}"
   end
 
   def link(out, objs)
-    puts "#{name} -o #{out} #{objs.join(" ")}"
-    system "#{name} -o #{out} #{objs.join(" ")}"
+    libs = flags.select {|f| f.start_with?('-l')}
+    puts "#{name} -o #{out} #{objs.join(" ")} #{libs.join(" ")}"
+    system "#{name} -o #{out} #{objs.join(" ")} #{libs.join(" ")}"
   end
 
   def inspect

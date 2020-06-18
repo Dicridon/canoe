@@ -123,7 +123,8 @@ class WorkSpace
   end
 
   def generate
-    DepAnalyzer.new('./src', @source_suffix, @header_suffix).build_to_file ['./src', './src/components'], @deps
+    DepAnalyzer.new('./src', @source_suffix, @header_suffix)
+               .build_to_file ['./src', './src/components'], @deps
   end
 
   def update
@@ -199,7 +200,7 @@ class WorkSpace
         end
       end
 
-      @compiler = Compiler.new compiler_name, compiler_flags.join(" ")
+      @compiler = Compiler.new compiler_name, compiler_flags
     end
   end
 
@@ -231,7 +232,8 @@ class WorkSpace
     
     comps.each do |f|
       puts "compiling #{f}"
-      o = @obj_prefix + f.delete_suffix(File.extname(f))[@components_prefix.length..].gsub('/', '_') + '.o'
+      o = @obj_prefix + f.delete_suffix(File.extname(f))[@components_prefix.length..]
+                         .gsub('/', '_') + '.o'
       compile f, o
     end
     

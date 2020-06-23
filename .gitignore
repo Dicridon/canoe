@@ -3,3 +3,4 @@
 *.hpp
 demo
 .vscode
+*.gem

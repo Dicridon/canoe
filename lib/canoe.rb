@@ -4,7 +4,16 @@ require_relative "source_files"
 
 class Canoe
   def initialize
-    options = ["new", "build", "run", "clean", "help", "add", "generate", "deps", "version"]
+    options = ['new', 
+               'add',
+               'build',
+               'generate',
+               'run',
+               'dep',
+               'clean',
+               'version',
+               'help',
+               'update']
     @cmd = CmdParser.new options
   end
 

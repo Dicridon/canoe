@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'canoe'
-  s.version = '0.2.1'
+  s.version = '0.2.3'
   # s.date = '2020-6-23'
   s.summary = 'a C/C++ project management and build tool'
   s.description = <<~DES
@@ -14,4 +14,5 @@ Gem::Specification.new do |s|
   s.files = Dir.glob 'lib/*.rb'
   s.executables << 'canoe'
   s.license = 'MIT'
+  s.required_ruby_version = ">= 2.7.1"
 end

@@ -130,7 +130,7 @@ car
 surely we would add one more line such as `#include "spark_plug/spark_plug.hpp"` to our `engine.hpp` or `engine.cpp`, so we need `canoe update` to update dependency relationships, then we could just `canoe run` again to see the output of our project.
 
 # Change log
-- v0.2.3:
+- v0.2.4:
   - new features
     - canoe now build shared object files!
   - improvements
@@ -143,6 +143,9 @@ surely we would add one more line such as `#include "spark_plug/spark_plug.hpp"`
       - allowing users to specify their desired project layouts doesn't make much sense, so I am giving up this option
     - in v0.4.0
       - I should prepare enough tests for canoe
+- v0.2.3:
+  - no functionality update
+  - corrected some false gem information
 - v0.2.2:
   - new command `dep` to see file dependencies
 - v0.2.1:

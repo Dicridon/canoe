@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'canoe'
-  s.version = '0.2.3'
+  s.version = '0.2.4'
   # s.date = '2020-6-23'
   s.summary = 'a C/C++ project management and building tool'
   s.description = <<~DES

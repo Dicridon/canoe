@@ -90,12 +90,12 @@ car
 
 To use classes and funcitons in `eninge`, we just need to include `engine/engine.hpp` in other source files(canoe adds `./components` to include path).
 
-After some coding, we want to run this project for a test, so we just need to type `canoe build && canoe run`, canoe would build this project and run the executable binary for you. And the project would be:
+After some coding, we want to run this project for a test, so we just need to type `canoe run`, canoe would build this project and run the executable binary for you. And the project would be:
 ```
 car
   |----config
   |----obj
-  |     |----engine.o
+  |     |----engin_engine.o
   |     |----main.o
   |----src
   |     |----components
@@ -107,14 +107,47 @@ car
   |     |----car
   |----third-party
 ```
-
-
+Later if we decide to add one more helper component called `spark_plug` to component `engine`, we just need to type `canoe add enging/spark_plug`, and the project would be
+```
+car
+  |----config
+  |----obj
+  |     |----engin_engine.o
+  |     |----main.o
+  |----src
+  |     |----components
+  |     |     |----engine
+  |     |     |     |----engine.hpp
+  |     |     |     |----engine.cpp
+  |     |     |     |----spark_plug
+  |     |     |     |     |----spark_plug.hpp
+  |     |     |     |     |----spark_plug.cpp
+  |     |----main.cpp
+  |----target
+  |     |----car
+  |----third-party
+```
+surely we would add one more line such as `#include "spark_plug/spark_plug.hpp"` to our `engine.hpp` or `engine.cpp`, so we need `canoe update` to update dependency relationships, then we could just `canoe run` again to see the output of our project.
 
 # Change log
+- v0.2.3:
+  - new features
+    - canoe now build shared object files!
+  - improvements
+    - README is updated with more detailed tutorial
+    - help message is updated too
+  - RoadMap
+    - in v0.3.0
+      - canoe shall be able to handle interations between different canoe projects, so different canoe projects would be able to freely share components among each other. This funcionality would be offered by command `canoe borrow`
+      - third-party dependency analyze would be enabled, in coordinance with command `canoe borrow`
+      - allowing users to specify their desired project layouts doesn't make much sense, so I am giving up this option
+    - in v0.4.0
+      - I should prepare enough tests for canoe
 - v0.2.2:
   - new command `dep` to see file dependencies
 - v0.2.1:
-  - new feature:
+  - canoe now is a ruby **gem**, I can finally get rid of those ugly Bash scripts!
+  - new features
     - config file is now in json format, enjoy jsons!
     - users may specify desired file suffixes using option `--suffix=source_suffix:header_suffix`, please notice the `:` between two suffixes
   - Roadmap
@@ -123,7 +156,7 @@ car
 - v0.2: 
   - new command `generate`
     - this command would create a `.canoe.deps` file, and `canoe build` command later may selectively compile some modified files according to `.canoe.deps`
-  - new feature: 
+  - new features:
       - canoe now behaves like `make`: only modified files would be compiled!
       - you do not need to write anything like `Makefile`, canoe would analyze the dependency relationships of all files in one project and generate `.canoe.deps` to describe them.
       - third-party library dependency analyze is **NOT** added, if you realy need external library not presented as `.so` files, you may add dependency relationship in `.canoe.deps` file.

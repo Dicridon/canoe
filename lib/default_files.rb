@@ -35,6 +35,18 @@ class DefaultFiles
     )
   end
 
+  def self.create_lib_header(path, lib_name, suffix='hpp')
+    open_file_and_write(
+      "#{path}/#{lib_name}.#{suffix}",
+      <<~DOC
+        #ifndef __#{lib_name.upcase}__
+        #define __#{lib_name.upcase}__
+
+        #endif
+      DOC
+    )
+  end
+
   def self.create_emacs_dir_local(path)
     open_file_and_write(
       "#{path}/.dir-locals.el",
@@ -52,7 +64,7 @@ class DefaultFiles
       "#{filename}.#{src_sfx}", 
       <<~DOC
                 #include "#{filename}.#{hdr_sfx}"
-            DOC
+      DOC
     )
   end
 

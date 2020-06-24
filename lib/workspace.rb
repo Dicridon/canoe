@@ -18,7 +18,9 @@ class WorkSpace
                 
                 canoe build: compile current project (execute this command in project directory)
 
-                canoe generate: generate dependency relationship and store it in '.canoe.deps'
+                canoe generate: generate dependency relationships and store it in '.canoe.deps' file. Alias: update
+
+                canoe update: udpate dependency relationships and store it in '.canoe.deps' file. 
                 
                 canoe run: compile and execute current project (execute this command in project directory)
                 
@@ -27,7 +29,8 @@ class WorkSpace
                 canoe help: show this help message
 
                 canoe add tada: add a folder named tada under workspace/components,
-                                two files tada.hpp and tada.cpp would be craeted and intialized
+                
+                canoe dep: show current dependency relationships of current project
                 
                 canoe verion: version information
 
@@ -38,11 +41,21 @@ class WorkSpace
 
                 [mode]: --lib for a library and --bin for executable binaries
                 [suffixes]: should be in 'source_suffix:header_suffix" format, notice the ':' between two suffixes
+            add component_name:
+                add a folder named tada under workspace/components.
+                two files tada.hpp and tada.cpp would be craeted and intialized. File suffix may differ according users' specifications.
+                if component_name is a path separated by '/', then canoe would create folders and corresponding files recursively.
 
             generate: 
                 generate dependence relationship for each file, this may accelarate
                 `canoe buid` command. It's recommanded to execute this command everytime
                 headers are added or removed from any file.
+            
+            update:
+                this command is needed because '.canoe.deps' is actually a cache of dependency relationships so that
+                canoe doesn't have to analyze all the files when building a project.
+                So when a file includes new headers or some headers are removed, users have to use 'canoe udpate'
+                to update dependency relationships.
 
             build [options]:
                 build current project, arguments in [options] will be passed to C++ compiler
@@ -95,7 +108,11 @@ class WorkSpace
     Dir.mkdir(@src)
     Dir.mkdir(@components)
     Dir.mkdir("#{@workspace}/obj")
-    DefaultFiles.create_main(@src, @source_suffix) if @mode == :bin
+    if @mode == :bin
+      DefaultFiles.create_main(@src, @source_suffix) 
+    else
+      DefaultFiles.create_lib_header(@src, @name, @header_suffix)
+    end
     File.new("#{@workspace}/.canoe", "w")
     DefaultFiles.create_config @workspace, @source_suffix, @header_suffix
     DefaultFiles.create_emacs_dir_local @workspace
@@ -136,6 +153,7 @@ class WorkSpace
   end
 
   def run(args)
+    return if @mode == :lib
     build []
     args = args.join " "
     puts "./target/#{@name} #{args}"
@@ -208,18 +226,30 @@ class WorkSpace
     @compiler.compile f, o
   end
 
-  def link(odir, objs)
-    status = system "#{@compiler} -o #{odir}/#{@name} #{objs.join(" ")}"
-    unless status
-      puts "compilation failed"
-      return
-    end
-    
-    @compiler.link "#{odir}/#{@name}", objs
+  def link_exectutable(odir, objs)
+    @compiler.link_executable "#{odir}/#{@name}", objs
+  end
+
+  def link_shared(odir, objs)
+    @compiler.link_shared "#{odir}/lib#{@name}", objs
   end
 
   def build_bin(files, args)
+    return if files.empty?
     build_compiler_from_config args
+    build_common files, args
+    link_exectutable('./target', Dir.glob("obj/*.o"))
+  end
+
+  def build_lib(files, args)
+    return if files.empty?
+    build_compiler_from_config args
+    @compiler.append_flag '-fPIC'
+    build_common files, args
+    link_shared('./target', Dir.glob("obj/*.o"))
+  end
+
+  def build_common(files, args)
     comps = files.select {|f| f.start_with? @components_prefix}
     srcs = files - comps
     
@@ -236,12 +266,6 @@ class WorkSpace
                          .gsub('/', '_') + '.o'
       compile f, o
     end
-    
-    link('./target', Dir.glob("obj/*.o")) unless files.empty?
-  end
-
-  def build_lib
-    puts "build a lib"
   end
 
   def clean_obj

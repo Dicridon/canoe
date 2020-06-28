@@ -2,6 +2,9 @@ require_relative "workspace"
 require_relative "err"
 require_relative "config_reader"
 
+##
+# class CmdParser
+#   Parsing command arguments passed to canoe
 class CmdParser
   include Err
   def initialize(options)

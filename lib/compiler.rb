@@ -1,5 +1,11 @@
+##
+# class Compiler
+#   Storing compiler name in String and flags as an array
 class Compiler
   attr_reader :name, :flags
+  ##
+  # @name: String
+  # @flgs: Array of String
   def initialize(name, flgs)
     @name = name
     @flags = flgs

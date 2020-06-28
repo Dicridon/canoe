@@ -1,3 +1,6 @@
+##
+# class SourceFiles
+#   A simple class to assist collect all files or some files in a directory.
 class SourceFiles
   class << self
     def get_all(dir, &block)

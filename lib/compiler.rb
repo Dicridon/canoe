@@ -8,32 +8,40 @@ class Compiler
   # @flgs: Array of String
   def initialize(name, flgs)
     @name = name
-    @flags = flgs
+    @linking_flags = flgs.filter {|f| f.start_with? "-l"}
+    @compiling_flags = flgs - @linking_flags
   end
 
-  def flags_as_str
-    flags.join " "
+  def compiling_flags_as_str
+    @compiling_flags.join " "
   end
 
-  def append_flag(flag)
-    @flags << flag
+  def linking_flags_as_str
+    @linking_flags.join " "
+  end
+
+
+  def append_compiling_flag(flag)
+    @compiling_flags << flag
+  end
+
+  def append_linking_flag(flag)
+    @linking_flags << flag
   end
 
   def compile(src, out)
-    puts "#{name} -o #{out} #{flags_as_str} -c #{src}"
-    system "#{name} -o #{out} #{flags_as_str} -c #{src}"
+    puts "#{name} -o #{out} #{compiling_flags_as_str} -c #{src}"
+    system "#{name} -o #{out} #{compiling_flags_as_str} -c #{src}"
   end
 
   def link_executable(out, objs)
-    libs = flags.select {|f| f.start_with?('-l')}
-    puts "#{name} -o #{out} #{objs.join(" ")} #{libs.join(" ")}"
-    system "#{name} -o #{out} #{objs.join(" ")} #{libs.join(" ")}"
+    puts "#{name} -o #{out} #{objs.join(" ")} #{linking_flags_as_str}"
+    system "#{name} -o #{out} #{objs.join(" ")} #{linking_flags_as_str}"
   end
 
   def link_shared(out, objs)
-    libs = flags.select {|f| f.start_with?('-l')}
-    puts "#{name} -shared -o #{out}.so #{objs.join(" ")} #{libs.join(" ")}"
-    system "#{name} -shared -o #{out}.so #{objs.join(" ")} #{libs.join(" ")}"
+    puts "#{name} -shared -o #{out}.so #{objs.join(" ")} #{linking_flags_as_str}"
+    system "#{name} -shared -o #{out}.so #{objs.join(" ")} #{linking_flags_as_str}"
   end
   
   def inspect

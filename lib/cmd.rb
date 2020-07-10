@@ -88,6 +88,10 @@ class CmdParser
     get_current_workspace.clean
   end
 
+  def parse_test(args)
+    get_current_workspace.test args
+  end
+
   def parse_version(args)
     puts <<~VER
         canoe v0.2.1

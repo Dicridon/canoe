@@ -84,7 +84,7 @@ class WorkSpace
 
   def initialize(name, mode, src_suffix='cpp', hdr_suffix='hpp')
     @name = name
-    @compiler = Compiler.new 'clang++', '-Isrc/components'
+    @compiler = Compiler.new 'clang++', ['-Isrc/components']
     @cwd = Dir.new(Dir.pwd)
     @workspace = "#{Dir.pwd}/#{@name}"
     @src = "#{@workspace}/src"
@@ -92,6 +92,7 @@ class WorkSpace
     @obj = "#{@workspace}/obj"
     @third = "#{@workspace}/third-party"
     @target = "#{@workspace}/target"
+    @tests = "#{@workspace}/tests"
     @mode = mode
     @deps = '.canoe.deps'
 
@@ -115,10 +116,13 @@ class WorkSpace
     end
     File.new("#{@workspace}/.canoe", "w")
     DefaultFiles.create_config @workspace, @source_suffix, @header_suffix
-    DefaultFiles.create_emacs_dir_local @workspace
+    # DefaultFiles.create_emacs_dir_local @workspace
 
     Dir.mkdir(@third)
     Dir.mkdir(@target)
+    Dir.chdir(@workspace) do
+      system "git init"
+    end
     puts "workspace #{@workspace} is created"
   end
 
@@ -189,6 +193,17 @@ class WorkSpace
       end
     end
   end
+
+  def test(args)
+    args.each do |arg|
+      case arg
+      when "all"
+        test_all
+      else
+        test_single arg        
+      end
+    end
+  end
   
   private
   def create_working_files(prefix, filename)
@@ -227,45 +242,61 @@ class WorkSpace
   end
 
   def link_exectutable(odir, objs)
+    puts "[100%] linking"
     @compiler.link_executable "#{odir}/#{@name}", objs
   end
 
   def link_shared(odir, objs)
+    puts "[100%] linking"
     @compiler.link_shared "#{odir}/lib#{@name}", objs
   end
 
   def build_bin(files, args)
     return if files.empty?
     build_compiler_from_config args
-    build_common files, args
-    link_exectutable('./target', Dir.glob("obj/*.o"))
+    if build_common(files, args)
+      link_exectutable('./target', Dir.glob("obj/*.o"))
+      puts "canoe: building succeeded"
+    else 
+      puts "canoe: building failed"
+    end
   end
 
   def build_lib(files, args)
     return if files.empty?
     build_compiler_from_config args
-    @compiler.append_flag '-fPIC'
-    build_common files, args
-    link_shared('./target', Dir.glob("obj/*.o"))
+    @compiler.append_compiling_flag '-fPIC'
+    if (build_common files, args)
+      link_shared('./target', Dir.glob("obj/*.o"))
+      puts "canoe: building succeeded"
+    else 
+      puts "canoe: building failed"
+    end
   end
 
   def build_common(files, args)
+    compiled, total = 0.0, files.size + 1
     comps = files.select {|f| f.start_with? @components_prefix}
     srcs = files - comps
-    
+    flag = true;
     srcs.each do |f|
-      puts "compiling #{f}"
+      progress = (compiled / total).round(2) * 100
+      printf "[#{progress.to_i}%%] compiling #{f}: "
       fname = f.split("/")[-1]
       o = @obj_prefix + fname.delete_suffix(File.extname(fname)) + '.o'
-      compile f, o
+      flag = false unless compile f, o 
+      compiled += 1
     end
     
     comps.each do |f|
-      puts "compiling #{f}"
+      progress = (compiled / total).round(2) * 100
+      printf "[#{progress.to_i}%%] compiling #{f}: "
       o = @obj_prefix + f.delete_suffix(File.extname(f))[@components_prefix.length..]
                          .gsub('/', '_') + '.o'
-      compile f, o
+      flag = false unless compile f, o
+      compiled += 1
     end
+    flag
   end
 
   def clean_obj

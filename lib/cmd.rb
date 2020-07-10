@@ -94,7 +94,7 @@ class CmdParser
 
   def parse_version(args)
     puts <<~VER
-        canoe v0.2.1
+        canoe v0.3.0
         For features in this version, please visit https://github.com/Dicridon/canoe
         Currently, canoe can do below:
             - project creation

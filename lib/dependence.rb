@@ -31,14 +31,17 @@ class DepAnalyzer
   def self.compiling_filter(deps, build_time, src_sfx='cpp', hdr_sfx='hpp')
     files = []
     @processed = {}
+    @recompiles = {}
     deps.keys.each do |k|
       @processed[k] = false
+      @recompiles[k] = false
     end
     deps.each do |k, v|
       next if k.end_with? ".#{hdr_sfx}"
       if should_recompile?(k, build_time)
         files << k
         @processed[k] = true
+        @recompiles[k] = true
         next
       end
       v.each do |f|
@@ -58,9 +61,12 @@ class DepAnalyzer
       return true
     else
       deps[file].each do |f|
-        next if @processed[f]
+        return @recompiles[f] if @processed[f]
         @processed[f] = true
-        return true if mark(f, build_time, deps)
+        if mark(f, build_time, deps)
+          @recompiles[f] = true
+          return true 
+        end
       end
     end
     false
@@ -69,7 +75,11 @@ class DepAnalyzer
   def self.should_recompile?(file, build_time) 
     judge = build_time
     if build_time == Time.new(0)
-      objfile = "./obj/#{File.basename(file, ".*")}.o"
+      objfile = if file.start_with?("./src/components")
+                  './obj/' + file.delete_suffix(File.extname(file))['./src/components/'.length..].gsub('/', '_') + '.o'
+                else
+                  "./obj/#{File.basename(file, ".*")}.o"
+                end
       return true unless File.exists? objfile
       judge = File.mtime(objfile)
     end

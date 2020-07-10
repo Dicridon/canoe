@@ -5,6 +5,7 @@ require_relative 'config_reader'
 require_relative 'default_files'
 require_relative 'err'
 require_relative 'dependence'
+require_relative 'coloring'
 
 class WorkSpace
   include Err
@@ -51,8 +52,7 @@ class WorkSpace
                 headers are added or removed from any file.
             
             update:
-                this command is needed because '.canoe.deps' is actually a cache of dependency relationships so that
-                canoe doesn't have to analyze all the files when building a project.
+                this command is needed because '.canoe.deps' is actually a cache of dependency relationships so that canoe doesn't have to analyze all the files when building a project.
                 So when a file includes new headers or some headers are removed, users have to use 'canoe udpate'
                 to update dependency relationships.
 
@@ -104,7 +104,11 @@ class WorkSpace
   end
 
   def new
-    Dir.mkdir(@name)
+    begin
+      Dir.mkdir(@name)
+    rescue
+      abort_on_err "workspace #{@name} already exsits"
+    end
     Dir.mkdir(@src)
     Dir.mkdir(@components)
     Dir.mkdir("#{@workspace}/obj")
@@ -122,7 +126,7 @@ class WorkSpace
     Dir.chdir(@workspace) do
       system "git init"
     end
-    puts "workspace #{@workspace} is created"
+    puts "workspace #{Coloring.blue(@workspace)} is created"
   end
 
   # args are commandline parameters passed to `canoe build`    
@@ -134,7 +138,7 @@ class WorkSpace
     build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
     files = DepAnalyzer.compiling_filter(deps, build_time, @source_suffix, @header_suffix)
 
-    if files.empty?
+    if files.empty? && File.exist?(target)
       puts "nothing to do, all up to date"
       return
     end
@@ -174,7 +178,7 @@ class WorkSpace
         unless Dir.exist? dir
           FileUtils.mkdir dir 
           Dir.chdir(dir) do
-            puts "created " + Dir.pwd
+            puts "created " + Coloring.blue(Dir.pwd)
             create_working_files prefix.join('__'), filename
           end
         end
@@ -186,8 +190,8 @@ class WorkSpace
     deps = DepAnalyzer.read_from(@deps) if File.exist?(@deps)
     deps.each do |k, v|
       unless v.empty?
-        puts "#{k} depends on: "
-        v.each {|f| puts "    #{f}"}
+        puts "#{Coloring.blue(k)} depends on: "
+        v.each {|f| puts "    #{Coloring.blue(f)}"}
         puts ""
       end
     end
@@ -241,35 +245,33 @@ class WorkSpace
   end
 
   def link_exectutable(odir, objs)
-    puts "[100%] linking"
+    puts "#{Coloring.green("[100%]")} linking"
     @compiler.link_executable "#{odir}/#{@name}", objs
   end
 
   def link_shared(odir, objs)
-    puts "[100%] linking"
+    puts "#{Coloring.green("[100%]")} linking"
     @compiler.link_shared "#{odir}/lib#{@name}", objs
   end
 
   def build_bin(files, args)
-    return if files.empty?
+    # return if files.empty?
     build_compiler_from_config args
-    if build_common(files, args)
-      link_exectutable('./target', Dir.glob("obj/*.o"))
-      puts "canoe: building succeeded"
+    if build_common(files, args) && link_exectutable('./target', Dir.glob("obj/*.o"))
+        puts Coloring.green("BUILDING SUCCEEDED")
     else 
-      puts "canoe: building failed"
+      puts Coloring.red("building FAILED")
     end
   end
 
   def build_lib(files, args)
-    return if files.empty?
+    # return if files.empty?
     build_compiler_from_config args
     @compiler.append_compiling_flag '-fPIC'
-    if (build_common files, args)
-      link_shared('./target', Dir.glob("obj/*.o"))
-      puts "canoe: building succeeded"
+    if (build_common files, args) && link_shared('./target', Dir.glob("obj/*.o"))
+      puts Coloring.green("BUILDING SUCCEEDED")
     else 
-      puts "canoe: building failed"
+      puts Coloring.red("building FAILED")
     end
   end
 
@@ -282,16 +284,16 @@ class WorkSpace
     flag = true;
     srcs.each do |f|
       progress = (compiled / total).round(2) * 100
-      printf "[#{progress.to_i}%%] compiling #{f}: "
+      printf Coloring.green("[#{progress.to_i}%%]") + " compiling #{f}: "
       fname = f.split("/")[-1]
-      o = @obj_prefix + fname.delete_suffix(File.extname(fname)) + '.o'
+      o = @obj_prefix + File.basename(fname, ".*") + '.o'
       flag = false unless compile f, o 
       compiled += 1
     end
     
     comps.each do |f|
       progress = (compiled / total).round(2) * 100
-      printf "[#{progress.to_i}%%] compiling #{f}: "
+      printf Coloring.green("[#{progress.to_i}%%]") + " compiling #{f}: "
       o = @obj_prefix + f.delete_suffix(File.extname(f))[@components_prefix.length..]
                          .gsub('/', '_') + '.o'
       flag = false unless compile f, o

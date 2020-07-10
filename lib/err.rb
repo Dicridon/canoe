@@ -1,7 +1,8 @@
+require_relative 'coloring'
 module Err
   def warn_on_err(err)
     puts <<~ERR
-           Warning: 
+           #{Coloring.yellow("Waring: ")}
                #{err}
            try 'canoe help' for more information
          ERR
@@ -9,7 +10,7 @@ module Err
 
   def abort_on_err(err)
     abort <<~ERR
-            Fatal: 
+            #{Coloring.red("Fatal: ")}
                 #{err}
             try 'canoe help' for more information
          ERR

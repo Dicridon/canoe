@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'open3'
 require_relative 'source_files'
 require_relative 'compiler'
 require_relative 'config_reader'
@@ -275,7 +274,9 @@ class WorkSpace
   end
 
   def build_common(files, args)
-    compiled, total = 0.0, files.size + 1
+    all = SourceFiles.get_all('./src') {|f| f.end_with? @source_suffix}
+    total = all.size.to_f
+    compiled = total - files.size
     comps = files.select {|f| f.start_with? @components_prefix}
     srcs = files - comps
     flag = true;

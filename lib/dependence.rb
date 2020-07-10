@@ -29,11 +29,16 @@ class DepAnalyzer
   end
 
   def self.compiling_filter(deps, build_time, src_sfx='cpp', hdr_sfx='hpp')
-    files = [] 
+    files = []
+    @processed = {}
+    deps.keys.each do |k|
+      @processed[k] = false
+    end
     deps.each do |k, v|
       next if k.end_with? ".#{hdr_sfx}"
       if should_recompile?(k, build_time)
         files << k
+        @processed[k] = true
         next
       end
       v.each do |f|
@@ -53,6 +58,8 @@ class DepAnalyzer
       return true
     else
       deps[file].each do |f|
+        next if @processed[f]
+        @processed[f] = true
         return true if mark(f, build_time, deps)
       end
     end

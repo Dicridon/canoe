@@ -5,9 +5,9 @@
 class DefaultFiles
   class << self
     def open_file_and_write(filename, content)
-      File.open(filename, "w") {|f|
+      File.open(filename, "w") do |f|
         f.write(content)
-      }
+      end
     end
 
     def create_config(path, src_sfx='cpp', hdr_sfx='hpp')

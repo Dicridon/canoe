@@ -126,7 +126,7 @@ class WorkSpace
     Dir.chdir(@workspace) do
       system "git init"
     end
-    puts "workspace #{Coloring.blue(@workspace)} is created"
+    puts "workspace #{@workspace.blue} is created"
   end
 
   # args are commandline parameters passed to `canoe build`    
@@ -178,7 +178,7 @@ class WorkSpace
         unless Dir.exist? dir
           FileUtils.mkdir dir 
           Dir.chdir(dir) do
-            puts "created " + Coloring.blue(Dir.pwd)
+            puts "created " + Dir.pwd.blue
             create_working_files prefix.join('__'), filename
           end
         end
@@ -190,8 +190,8 @@ class WorkSpace
     deps = DepAnalyzer.read_from(@deps) if File.exist?(@deps)
     deps.each do |k, v|
       unless v.empty?
-        puts "#{Coloring.blue(k)} depends on: "
-        v.each {|f| puts "    #{Coloring.blue(f)}"}
+        puts "#{k.blue} depends on: "
+        v.each {|f| puts "    #{f.blue}"}
         puts ""
       end
     end
@@ -245,12 +245,12 @@ class WorkSpace
   end
 
   def link_exectutable(odir, objs)
-    puts "#{Coloring.green("[100%]")} linking"
+    puts "#{"[100%]".green} linking"
     @compiler.link_executable "#{odir}/#{@name}", objs
   end
 
   def link_shared(odir, objs)
-    puts "#{Coloring.green("[100%]")} linking"
+    puts "#{"[100%]".green} linking"
     @compiler.link_shared "#{odir}/lib#{@name}", objs
   end
 
@@ -258,9 +258,9 @@ class WorkSpace
     # return if files.empty?
     build_compiler_from_config args
     if build_common(files, args) && link_exectutable('./target', Dir.glob("obj/*.o"))
-        puts Coloring.green("BUILDING SUCCEEDED")
+        puts "BUILDING SUCCEEDED".green
     else 
-      puts Coloring.red("building FAILED")
+      puts "building FAILED".red
     end
   end
 
@@ -269,9 +269,9 @@ class WorkSpace
     build_compiler_from_config args
     @compiler.append_compiling_flag '-fPIC'
     if (build_common files, args) && link_shared('./target', Dir.glob("obj/*.o"))
-      puts Coloring.green("BUILDING SUCCEEDED")
+      puts "BUILDING SUCCEEDED".green
     else 
-      puts Coloring.red("building FAILED")
+      puts "building FAILED".red
     end
   end
 
@@ -284,7 +284,7 @@ class WorkSpace
     flag = true;
     srcs.each do |f|
       progress = (compiled / total).round(2) * 100
-      printf Coloring.green("[#{progress.to_i}%%]") + " compiling #{f}: "
+      printf "[#{progress.to_i}%%]".green + " compiling #{f}: "
       fname = f.split("/")[-1]
       o = @obj_prefix + File.basename(fname, ".*") + '.o'
       flag = false unless compile f, o 
@@ -293,7 +293,7 @@ class WorkSpace
     
     comps.each do |f|
       progress = (compiled / total).round(2) * 100
-      printf Coloring.green("[#{progress.to_i}%%]") + " compiling #{f}: "
+      printf "[#{progress.to_i}%%]".green + " compiling #{f}: "
       o = @obj_prefix + f.delete_suffix(File.extname(f))[@components_prefix.length..]
                          .gsub('/', '_') + '.o'
       flag = false unless compile f, o

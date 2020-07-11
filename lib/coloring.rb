@@ -1,6 +1,8 @@
-class Coloring
-  class << self
-    COLORS = {
+##
+# gem Colorize is a great tool, but I don't want add dependencies to Canoe
+class String
+  def self.define_coloring_methods
+    colors = {
         30 => :black,
         31 => :red,
         32 => :green,
@@ -10,11 +12,12 @@ class Coloring
         36 => :cyan,
         37 => :white
     }
-
-    COLORS.each do |k, v|
-      define_method v do |str|
-        "\033[#{k}m#{str}\033[0m"
+    colors.each do |k, v|
+      define_method v do
+        "\033[#{k}m#{self}\033[0m"
       end
     end
   end
+
+  define_coloring_methods
 end

@@ -19,9 +19,14 @@ class DefaultFiles
               "header-suffix": "#{hdr_sfx}",
               "source-suffix": "#{src_sfx}",
               "flags": {
-                  "opt": "-O2",
-                  "debug": "-g",
-                  "std": "-std=c++17"
+                  "compile": {
+                      "opt": "-O2",
+                      "debug": "-g",
+                      "std": "-std=c++17"
+                  },
+                  "link": {
+                    
+                  }
               }
           }
         CONFIG

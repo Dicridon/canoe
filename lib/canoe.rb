@@ -1,4 +1,4 @@
-require_relative "workspace"
+require_relative "workspace/workspace.rb"
 require_relative "cmd"
 require_relative "source_files"
 
@@ -13,7 +13,8 @@ class Canoe
                'clean',
                'version',
                'help',
-               'update']
+               'update',
+               'test']
     @cmd = CmdParser.new options
   end
 

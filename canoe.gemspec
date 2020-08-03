@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'canoe'
-  s.version = '0.3.0'
+  s.version = '0.3.0.1'
   # s.date = '2020-6-23'
   s.summary = 'a C/C++ project management and building tool'
   s.description = <<~DES
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.authors = ["XIONG Ziwei"]
   s.email = 'noahxiong@outlook.com'
   s.homepage = 'https://github.com/Dicridon/canoe'
-  s.files = Dir.glob 'lib/*.rb'
+  s.files = Dir.glob('lib/*.rb') + Dir.glob('lib/workspace/*.rb')
   s.executables << 'canoe'
   s.license = 'MIT'
   s.required_ruby_version = ">= 2.7.1"

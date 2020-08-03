@@ -6,10 +6,10 @@ class Compiler
   ##
   # @name: String
   # @flgs: Array of String
-  def initialize(name, flgs)
+  def initialize(name, compiling_flags, linking_flags)
     @name = name
-    @linking_flags = flgs.filter {|f| f.start_with? "-l"}
-    @compiling_flags = flgs - @linking_flags
+    @linking_flags = linking_flags
+    @compiling_flags = compiling_flags
   end
 
   def compiling_flags_as_str

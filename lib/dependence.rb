@@ -47,6 +47,8 @@ class DepAnalyzer
       v.each do |f|
         if mark(f, build_time, deps) || mark(f.sub(".#{hdr_sfx}", ".#{src_sfx}"), build_time, deps)
           files << k
+          @processed[k] = true
+          @recompiles[k] = true
           break
         end
       end

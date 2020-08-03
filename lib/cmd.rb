@@ -1,4 +1,4 @@
-require_relative "workspace"
+require_relative "workspace/workspace"
 require_relative "err"
 require_relative "config_reader"
 

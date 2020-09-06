@@ -58,12 +58,16 @@ class DepAnalyzer
 
   private
   def self.mark(file, build_time, deps)
+    ret = false
     return false unless File.exists? file
     if should_recompile?(file, build_time)
       return true
     else
       deps[file].each do |f|
-        return @recompiles[f] if @processed[f]
+        if @processed[f]
+          ret |= @recompiles[f]
+          next
+        end
         @processed[f] = true
         if mark(f, build_time, deps)
           @recompiles[f] = true
@@ -71,7 +75,7 @@ class DepAnalyzer
         end
       end
     end
-    false
+    ret
   end
 
   def self.should_recompile?(file, build_time) 

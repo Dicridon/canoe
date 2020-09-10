@@ -49,9 +49,14 @@ a config file is a json file
   "header-suffix": "hpp",
   "source-suffix": "cpp",
   "flags": {
-    "opt": "-O2",
-    "debug": "-g",
-    "std": "-std=c++17"
+    "compile": {
+      "opt": "-O2",
+      "debug": "-g",
+      "std": "-std=c++17"
+    },
+    "link": {
+
+    }
   }
 }
 ```

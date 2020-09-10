@@ -5,7 +5,7 @@ require_relative 'err'
 # class DepAnalyzer
 #   This class is the key component of canoe, which offers file dependency analysis functionality. 
 #     A DepAnalyzer takes a directory as input, sources files and corresponding header files in this
-#     directory should have same name, i.e. test.cpp and test.hpp.
+#     directory should have same name, e.g. test.cpp and test.hpp.
 #     DepAnalyzer would read every source file and recursively process user header files included in this source file to
 #     find out all user header files this source file depends on.
 #     Based on dependencies built in previous stage, DepAnalyzer determines which files should be recompiled and return

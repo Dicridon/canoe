@@ -4,7 +4,7 @@ class WorkSpace
     deps.each do |k, v|
       unless v.empty?
         puts "#{k.blue} depends on: "
-        v.each {|f| puts "    #{f.blue}"}
+        v.each { |f| puts "    #{f.blue}" }
         puts ""
       end
     end

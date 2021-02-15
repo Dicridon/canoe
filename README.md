@@ -1,7 +1,15 @@
 # Canoe
-canoe is a C/C++ project management tool, inspired by Cargo for Rust.
+If you are a C/C++ programmer, writing `Makefile`, `CMakeLists.txt` or `SConstruct` may has been a pain for you. Even though `cmake` and `scons` are more human-friendly than legacy `make`, writing building scripts is still a mental torture because we simply forget all the syntaxes once the scripts are finished.
 
-# Prequisite
+Such mental torture drives me to write `canoe`, a C/C++ project management tool inspired by `cargo` for Rust. Rustaceans simple type `cargo new`, `cargo build` and `cargo run` to create, build and run a Rust project. Now C/C++ programmers may type `canoe new`, `canoe build` and `canoe run` to create, build and run a C/C++ project without any scripting! Moreover, `canoe make` generates a `Makefile` for you for compatibility with legacy projects and machines!
+
+# Functionality and limitations
+- Building the whole project without forcing users to write building scripts
+- Automatically analyze which files should be recompiled
+- Capable to interact with `make` based C/C++ projects
+- Conventions over file naming should be followed
+- Unlike `make`, which is a universal building tool, `canoe` is specialized for C/C++.
+# Prerequisite
 Ruby 2.7.1 or above
 
 # Installation
@@ -29,7 +37,7 @@ demo
    |     |----demo
    |----third-party
 ```
-`demo`: all commands except `canoe new` should be executed under this directory.
+`demo`: all commands except `canoe new` and `canoe version` should be executed under this directory.
 
 `config`: This file configures compilation flags.
 
@@ -134,7 +142,26 @@ car
 ```
 surely we would add one more line such as `#include "spark_plug/spark_plug.hpp"` to our `engine.hpp` or `engine.cpp`, so we need `canoe update` to update dependency relationships, then we could just `canoe run` again to see the output of our project.
 
+# Interaction with Make
+Since `v0.3.1`, `canoe` understands how to generate `Makefile`. We may freely choose any two commands among `canoe build`, `canoe clean`, `make` and `make clean` to build our projects once `Makefile` is generated via command `canoe make`. (Eventually my schoolmates won't complain about they have to install `Ruby` even when the servers have no access to the Internet :).
+
+Another reason pushing me to write `canoe make` is that single-thread compilation of C++ code is far too slow while `canoe` is a single thread building tool. Using `make` gets me rid of those tedious details in multithread programming and also prevents me to write more bugs. Since now `canoe` is able to interact with `make`, my personal expectation of `canoe` would be that: we create `canoe` projects and let `canoe` to manage dependency for us just like `cargo` for `Rust`, so we need to write no building scripts. When it comes to building, we use `canoe make` to generate `Makefile`s and use `make` for fast building.
+
+I intended to write a `canoe cmake` for `CMake` users, but considering that `CMake` projects eventually invoke `make`, I decided to implement `canoe make` only.
+
+# Let's write it together
+I'm practicing `Ruby` with this tool, a lot of optimizations can be further conducted and my code style is not quite in the `Ruby` way. Plus, compared with `cargo`, `canoe` has only the basic building functionalities. So if you are interested in `canoe`, please join me and let's enhance `canoe` together! Send me an email at `noahxiong@outlook.com` if you'd like to join!
+
 # Change log
+- v0.3.1:
+  - new features
+    - new command `canoe make` is provided to generate a Makefile for a canoe project, so now `canoe` projects are compatible with `Makefile` based projects
+  - bug fixes: 
+    - `version` command won't failed when executed outside a `canoe` project
+  - unfixed bugs:
+    - `run` command always run the executable even if recompilation fails. This bug will be fixed when the command `test` is finished
+  - RoadMap
+    - `canoe test` and `canoe borrow` will be available if I had enough spare time :)
 - v0.2.4:
   - new features
     - canoe now build shared object files!

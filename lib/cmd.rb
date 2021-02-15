@@ -7,13 +7,14 @@ require_relative "config_reader"
 #   Parsing command arguments passed to canoe
 class CmdParser
   include Err
+
   def initialize(options)
-    @options = options 
+    @options = options
   end
 
   def parse(args)
-    if args.size < 1 
-      abort_on_err "please give one command among #{@options.join(', ')}"
+    if args.size < 1
+      abort_on_err "please give one command among #{@options.join(", ")}"
     end
 
     unless @options.include?(args[0])
@@ -24,6 +25,7 @@ class CmdParser
   end
 
   private
+
   def get_current_workspace
     abort_on_err "not in a canoe workspace" unless File.exists? ".canoe"
     config = ConfigReader.extract_flags("config.json")
@@ -34,7 +36,7 @@ class CmdParser
     name = Dir.pwd.split("/")[-1]
     mode = File.exists?("src/main.#{src_sfx}") ? :bin : :lib
 
-    Dir.chdir('..') do
+    Dir.chdir("..") do
       return WorkSpace.new(name, mode, src_sfx, hdr_sfx)
     end
   end
@@ -44,10 +46,10 @@ class CmdParser
 
     name, mode = nil, "bin"
     suffixes = ["cpp", "hpp"]
-    
+
     args.each do |arg|
       case arg
-      when '--bin', '--lib'
+      when "--bin", "--lib"
         mode = arg[2..]
       when /--suffix=(\w+)\:(\w+)/
         suffixes[0], suffixes[1] = $1, $2
@@ -55,7 +57,7 @@ class CmdParser
         name = arg unless name
       end
     end
-    
+
     abort_on_err("please give a name to this project") unless name
     WorkSpace.new(name, mode.to_sym, suffixes[0], suffixes[1]).new
   end
@@ -67,7 +69,7 @@ class CmdParser
 
     get_current_workspace.add args
   end
-  
+
   def parse_build(args)
     get_current_workspace.build args
   end
@@ -75,15 +77,15 @@ class CmdParser
   def parse_generate(args)
     get_current_workspace.generate
   end
-  
+
   def parse_run(args)
     get_current_workspace.run args
   end
 
   def parse_dep(args)
-    get_current_workspace.dep 
+    get_current_workspace.dep
   end
-  
+
   def parse_clean(args)
     get_current_workspace.clean
   end
@@ -93,14 +95,26 @@ class CmdParser
   end
 
   def parse_version(args)
-    get_current_workspace.version
+    puts <<~VER
+           canoe v0.3.1
+           For features in this version, please visit https://github.com/Dicridon/canoe
+           Currently, canoe can do below:
+               - project creation
+               - project auto build and run (works like Cargo for Rust)
+              - project structure management
+           by XIONG Ziwei
+         VER
   end
-  
+
   def parse_help(args)
     WorkSpace.help
   end
 
   def parse_update(args)
     get_current_workspace.update
+  end
+
+  def parse_make(args)
+    get_current_workspace.make
   end
 end

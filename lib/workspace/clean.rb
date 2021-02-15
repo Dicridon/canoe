@@ -2,8 +2,9 @@ class WorkSpace
   def clean
     self.send "clean_#{@mode.to_s}"
   end
-  
-private    
+
+  private
+
   def clean_obj
     puts "rm -f ./obj/*.o"
     system "rm -f ./obj/*.o"

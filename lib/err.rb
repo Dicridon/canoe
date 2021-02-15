@@ -1,4 +1,5 @@
-require_relative 'coloring'
+require_relative "coloring"
+
 module Err
   def warn_on_err(err)
     puts <<~ERR
@@ -13,7 +14,7 @@ module Err
             #{"Fatal: ".red}
                 #{err}
             try 'canoe help' for more information
-         ERR
+          ERR
   end
 
   module_function :warn_on_err, :abort_on_err

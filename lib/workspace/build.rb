@@ -1,5 +1,5 @@
 class WorkSpace
-  # args are commandline parameters passed to `canoe build`, 
+  # args are commandline parameters passed to `canoe build`,
   # could be 'all', 'test', 'target' or empty
   def build(args)
     case args[0]
@@ -12,8 +12,9 @@ class WorkSpace
     end
   end
 
-private
-  def build_flags(flags, config) 
+  private
+
+  def build_flags(flags, config)
     config.values.each do |v|
       case v
       when String
@@ -31,12 +32,12 @@ private
   def build_compiler_from_config
     Dir.chdir(@workspace) do
       flags = ConfigReader.extract_flags "config.json"
-      compiler_name = flags['compiler'] ? flags['compiler'] : "clang++"
+      compiler_name = flags["compiler"] ? flags["compiler"] : "clang++"
       abort_on_err "compiler #{compiler_name} not found" unless File.exists?("/usr/bin/#{compiler_name}")
-      compiler_flags = ['-Isrc/components']
+      compiler_flags = ["-Isrc/components"]
       linker_flags = []
 
-      c_flags, l_flags = flags['flags']['compile'], flags['flags']['link']
+      c_flags, l_flags = flags["flags"]["compile"], flags["flags"]["link"]
       build_flags(compiler_flags, c_flags)
       build_flags(linker_flags, l_flags)
 
@@ -61,9 +62,9 @@ private
   def build_bin(files)
     # return if files.empty?
     build_compiler_from_config
-    if build_common(files) && link_exectutable('./target', Dir.glob("obj/*.o"))
-        puts "BUILDING SUCCEEDED".green
-    else 
+    if build_common(files) && link_exectutable("./target", Dir.glob("obj/*.o"))
+      puts "BUILDING SUCCEEDED".green
+    else
       puts "building FAILED".red
     end
   end
@@ -71,28 +72,28 @@ private
   def build_lib(files)
     # return if files.empty?
     build_compiler_from_config
-    @compiler.append_compiling_flag '-fPIC'
-    if build_common(files) && link_shared('./target', Dir.glob("obj/*.o"))
+    @compiler.append_compiling_flag "-fPIC"
+    if build_common(files) && link_shared("./target", Dir.glob("obj/*.o"))
       puts "BUILDING SUCCEEDED".green
-    else 
+    else
       puts "building FAILED".red
     end
   end
 
   def build_common(files)
-    all = SourceFiles.get_all('./src') {|f| f.end_with? @source_suffix}
+    all = SourceFiles.get_all("./src") { |f| f.end_with? @source_suffix }
     total = all.size.to_f
     compiled = total - files.size
-    comps = files.select {|f| f.start_with? @components_prefix}
+    comps = files.select { |f| f.start_with? @components_prefix }
     srcs = files - comps
-    flag = true;
-    
+    flag = true
+
     srcs.each do |f|
       progress = (compiled / total).round(2) * 100
       printf "[#{progress.to_i}%%]".green + " compiling #{f}: "
       fname = f.split("/")[-1]
-      o = @obj_prefix + File.basename(fname, ".*") + '.o'
-      flag = false unless compile f, o 
+      o = @obj_prefix + File.basename(fname, ".*") + ".o"
+      flag = false unless compile f, o
       compiled += 1
     end
 
@@ -100,7 +101,7 @@ private
       progress = (compiled / total).round(2) * 100
       printf "[#{progress.to_i}%%]".green + " compiling #{f}: "
       o = @obj_prefix + f.delete_suffix(File.extname(f))[@components_prefix.length..]
-                         .gsub('/', '_') + '.o'
+        .gsub("/", "_") + ".o"
       flag = false unless compile f, o
       compiled += 1
     end
@@ -113,9 +114,9 @@ private
   end
 
   def build_target
-    deps = File.exist?(@deps) ? 
-           DepAnalyzer.read_from(@deps) :
-           DepAnalyzer.new('./src').build_to_file(['./src', './src/components'], @deps)
+    deps = File.exist?(@deps) ?
+      DepAnalyzer.read_from(@deps) :
+      DepAnalyzer.new("./src").build_to_file(["./src", "./src/components"], @deps)
     target = "./target/#{@name}"
     build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
     files = DepAnalyzer.compiling_filter(deps, build_time, @source_suffix, @header_suffix)

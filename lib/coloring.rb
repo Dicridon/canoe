@@ -3,14 +3,14 @@
 class String
   def self.define_coloring_methods
     colors = {
-        30 => :black,
-        31 => :red,
-        32 => :green,
-        33 => :yellow,
-        34 => :blue,
-        35 => :magenta,
-        36 => :cyan,
-        37 => :white
+      30 => :black,
+      31 => :red,
+      32 => :green,
+      33 => :yellow,
+      34 => :blue,
+      35 => :magenta,
+      36 => :cyan,
+      37 => :white,
     }
     colors.each do |k, v|
       define_method v do

@@ -10,9 +10,9 @@ class DefaultFiles
       end
     end
 
-    def create_config(path, src_sfx='cpp', hdr_sfx='hpp')
+    def create_config(path, src_sfx = "cpp", hdr_sfx = "hpp")
       open_file_and_write(
-        "#{path}/config.json", 
+        "#{path}/config.json",
         <<~CONFIG
           {
               "compiler": "clang++",
@@ -30,10 +30,11 @@ class DefaultFiles
               }
           }
         CONFIG
-      )
+      
+)
     end
 
-    def create_main(path, suffix='cpp')
+    def create_main(path, suffix = "cpp")
       open_file_and_write(
         "#{path}/main.#{suffix}",
         <<~DOC
@@ -42,10 +43,11 @@ class DefaultFiles
               std::cout << "hello world!" << std::endl;
           }
         DOC
-      )
+      
+)
     end
 
-    def create_lib_header(path, lib_name, suffix='hpp')
+    def create_lib_header(path, lib_name, suffix = "hpp")
       open_file_and_write(
         "#{path}/#{lib_name}.#{suffix}",
         <<~DOC
@@ -54,7 +56,8 @@ class DefaultFiles
          
           #endif
         DOC
-      )
+      
+)
     end
 
     # def create_emacs_dir_local(path)
@@ -69,16 +72,17 @@ class DefaultFiles
     #   )
     # end
 
-    def create_cpp(filename, src_sfx='cpp', hdr_sfx='hpp')
+    def create_cpp(filename, src_sfx = "cpp", hdr_sfx = "hpp")
       open_file_and_write(
-        "#{filename}.#{src_sfx}", 
+        "#{filename}.#{src_sfx}",
         <<~DOC
           #include "#{filename}.#{hdr_sfx}"
         DOC
-      )
+      
+)
     end
 
-    def create_hpp(workspace, prefix, filename, hdr_sfx='hpp')
+    def create_hpp(workspace, prefix, filename, hdr_sfx = "hpp")
       open_file_and_write(
         "#{filename}.#{hdr_sfx}",
         <<~DOC
@@ -87,7 +91,8 @@ class DefaultFiles
           
           #endif
         DOC
-      )
+      
+)
     end
   end
 end

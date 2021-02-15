@@ -1,9 +1,9 @@
-require_relative 'source_files'
-require_relative 'err'
+require_relative "source_files"
+require_relative "err"
 
 ##
 # class DepAnalyzer
-#   This class is the key component of canoe, which offers file dependency analysis functionality. 
+#   This class is the key component of canoe, which offers file dependency analysis functionality.
 #     A DepAnalyzer takes a directory as input, sources files and corresponding header files in this
 #     directory should have same name, e.g. test.cpp and test.hpp.
 #     DepAnalyzer would read every source file and recursively process user header files included in this source file to
@@ -20,15 +20,15 @@ class DepAnalyzer
     File.open(filename, "r") do |f|
       ret = Hash.new []
       f.each_with_index do |line, i|
-        entry = line.split(': ')
-        Err.abort_on_err("Bad .canoe.deps format, line #{i+1}") unless entry.length == 2
+        entry = line.split(": ")
+        Err.abort_on_err("Bad .canoe.deps format, line #{i + 1}") unless entry.length == 2
         ret[entry[0]] = entry[1].split
-      end            
+      end
       ret
     end
   end
 
-  def self.compiling_filter(deps, build_time, src_sfx='cpp', hdr_sfx='hpp')
+  def self.compiling_filter(deps, build_time, src_sfx = "cpp", hdr_sfx = "hpp")
     files = []
     @processed = {}
     @recompiles = {}
@@ -57,6 +57,7 @@ class DepAnalyzer
   end
 
   private
+
   def self.mark(file, build_time, deps)
     ret = false
     return false unless File.exists? file
@@ -71,21 +72,21 @@ class DepAnalyzer
         @processed[f] = true
         if mark(f, build_time, deps)
           @recompiles[f] = true
-          return true 
+          return true
         end
       end
     end
     ret
   end
 
-  def self.should_recompile?(file, build_time) 
+  def self.should_recompile?(file, build_time)
     judge = build_time
     if build_time == Time.new(0)
       objfile = if file.start_with?("./src/components")
-                  './obj/' + file.delete_suffix(File.extname(file))['./src/components/'.length..].gsub('/', '_') + '.o'
-                else
-                  "./obj/#{File.basename(file, ".*")}.o"
-                end
+          "./obj/" + file.delete_suffix(File.extname(file))["./src/components/".length..].gsub("/", "_") + ".o"
+        else
+          "./obj/#{File.basename(file, ".*")}.o"
+        end
       return true unless File.exists? objfile
       judge = File.mtime(objfile)
     end
@@ -93,7 +94,8 @@ class DepAnalyzer
   end
 
   public
-  def initialize(dir, src_sfx='cpp', hdr_sfx='hpp')
+
+  def initialize(dir, src_sfx = "cpp", hdr_sfx = "hpp")
     @dir = dir
     @deps = Hash.new []
     @source_suffix = src_sfx
@@ -115,25 +117,26 @@ class DepAnalyzer
 
   def build_to_file(include_path, filename)
     build_dependence include_path
-    
+
     File.open(filename, "w") do |f|
       @deps.each do |k, v|
         f.write "#{k}: #{v.join(" ")}\n"
       end
     end
-    
+
     @deps
   end
 
   private
-  def get_all_headers(include_path, file, suffix='hpp')
+
+  def get_all_headers(include_path, file, suffix = "hpp")
     File.open(file, "r") do |f|
       ret = []
       if file.end_with?(".#{@source_suffix}")
         header = file.sub(".#{@source_suffix}", ".#{@header_suffix}")
         ret += [header] if File.exists?(header)
       end
-      
+
       f.each_line do |line|
         if mat = line.match(/include "(.+\.#{suffix})"/)
           include_path.each do |path|
@@ -142,7 +145,7 @@ class DepAnalyzer
           end
         end
       end
-      
+
       ret.uniq
     end
   end

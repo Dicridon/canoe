@@ -8,17 +8,18 @@ class WorkSpace
         dir += "/#{filename}"
         prefix << filename
         unless Dir.exist? dir
-          FileUtils.mkdir dir 
+          FileUtils.mkdir dir
           Dir.chdir(dir) do
             puts "created " + Dir.pwd.blue
-            create_working_files prefix.join('__'), filename
+            create_working_files prefix.join("__"), filename
           end
         end
       end
     end
   end
 
-private
+  private
+
   def create_working_files(prefix, filename)
     DefaultFiles.create_cpp filename, @source_suffix, @header_suffix
     DefaultFiles.create_hpp @name, prefix, filename, @header_suffix

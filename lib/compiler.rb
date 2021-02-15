@@ -20,7 +20,6 @@ class Compiler
     @linking_flags.join " "
   end
 
-
   def append_compiling_flag(flag)
     @compiling_flags << flag
   end
@@ -43,7 +42,7 @@ class Compiler
     puts "#{name} -shared -o #{out}.so #{objs.join(" ")} #{linking_flags_as_str}"
     system "#{name} -shared -o #{out}.so #{objs.join(" ")} #{linking_flags_as_str}"
   end
-  
+
   def inspect
     puts "compiler name: #{name.inspect}"
     puts "compiler flags: #{flags.inspect}"

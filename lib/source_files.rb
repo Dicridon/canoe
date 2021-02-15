@@ -5,7 +5,7 @@ class SourceFiles
   class << self
     def get_all(dir, &block)
       @files = []
-      get_all_helper(dir, &block) 
+      get_all_helper(dir, &block)
       @files
     end
 
@@ -19,13 +19,14 @@ class SourceFiles
           else
             @files << "#{file}"
           end
-        end 
+        end
       end
-      
+
       @files
     end
 
     private
+
     def get_all_helper(dir, &block)
       Dir.each_child(dir) do |f|
         file = "#{dir}/#{f}"
@@ -42,4 +43,3 @@ class SourceFiles
     end
   end
 end
-

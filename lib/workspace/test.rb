@@ -1,5 +1,6 @@
 class WorkSpace
-public
+  public
+
   def test(args)
     if args.empty?
       test_all
@@ -11,12 +12,13 @@ public
       when "all"
         test_all
       else
-        test_single arg        
+        test_single arg
       end
     end
   end
 
-private
+  private
+
   def test_all
     puts "tests all"
   end
@@ -25,7 +27,7 @@ private
     puts "#{@tests}/bin/test_#{name}"
     # system "./#{@tests}/bin/test_#{name}"
   end
-  
+
   ##
   # how to build:
   # each test file tests one or more components, indicated by included headers
@@ -33,7 +35,7 @@ private
   # TODO
   def build_test
     build
-    deps = DepAnalyzer.new('./tests').build_to_file(['./src', './src/components', './tests', './tests/common'], './tests/.canoe.deps')
+    deps = DepAnalyzer.new("./tests").build_to_file(["./src", "./src/components", "./tests", "./tests/common"], "./tests/.canoe.deps")
     puts deps
   end
 end

@@ -1,5 +1,5 @@
 # Canoe
-If you are a C/C++ programmer, writing `Makefile`, `CMakeLists.txt` or `SConstruct` may has been a pain for you. Even though `cmake` and `scons` are more human-friendly than legacy `make`, writing building scripts is still a mental torture because we simply forget all the syntaxes once the scripts are finished.
+If you are a C/C++ programmer, writing `Makefile`, `CMakeLists.txt` or `SConstruct` may have been a pain for you. Even though `cmake` and `scons` are more human-friendly than legacy `make`, writing building scripts is still a mental torture because we simply forget all the syntaxes once the scripts are finished.
 
 Such mental torture drives me to write `canoe`, a C/C++ project management tool inspired by `cargo` for Rust. Rustaceans simple type `cargo new`, `cargo build` and `cargo run` to create, build and run a Rust project. Now C/C++ programmers may type `canoe new`, `canoe build` and `canoe run` to create, build and run a C/C++ project without any scripting! Moreover, `canoe make` generates a `Makefile` for you for compatibility with legacy projects and machines!
 

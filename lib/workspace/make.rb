@@ -1,3 +1,4 @@
+# If the project has circular dependency, this command would fail
 class Makefile
   def initialize(workspace)
     @workspace = workspace

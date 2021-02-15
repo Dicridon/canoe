@@ -40,6 +40,7 @@ class WorkSpace
 end
 
 require_relative "help"
+require_relative "version"
 require_relative "new"
 require_relative "add"
 require_relative "build"

@@ -224,7 +224,7 @@ class WorkSpace
 
     deps = File.exist?(@deps) ?
       DepAnalyzer.read_from(@deps) :
-      DepAnalyzer.new("./src").build_to_fil
+      DepAnalyzer.new("./src").build_to_file(["./src", "./src/components"], @deps)
 
     makefile = Makefile.new(self)
     makefile.configure(config)

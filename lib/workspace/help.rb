@@ -1,6 +1,7 @@
-class WorkSpace
-  def self.help
-    info = <<~INFO
+module Canoe
+  class WorkSpace
+    def self.help
+      info = <<~INFO
       canoe is a C/C++ project manager, inspired by Rust cargo.
       usage:
           canoe new tada: create a project named 'tada' in current directory
@@ -71,6 +72,7 @@ class WorkSpace
       @author: written by XIONG Ziwei, ICT, CAS
       @contact: noahxiong@outlook.com
     INFO
-    puts info
+      puts info
+    end
   end
 end

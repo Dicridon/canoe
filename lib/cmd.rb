@@ -28,7 +28,7 @@ module Canoe
     private
 
     def get_current_workspace
-      abort_on_err "not in a canoe workspace" unless File.exists? ".canoe"
+      abort_on_err 'not in a canoe workspace' unless File.exists? '.canoe'
       config = ConfigReader.extract_flags("config.json")
 
       src_sfx = config["source-suffix"] ? config["source-suffix"] : "cpp"
@@ -59,7 +59,7 @@ module Canoe
       end
 
       abort_on_err("please give a name to this project") unless name
-      WorkSpace.new(name, mode.to_sym, suffixes[0], suffixes[1]).new
+      WorkSpace.new(name, mode.to_sym, suffixes[0], suffixes[1], true).new
     end
 
     def parse_add(args)
@@ -87,7 +87,7 @@ module Canoe
     end
 
     def parse_clean(args)
-      get_current_workspace.clean
+      get_current_workspace.clean args
     end
 
     def parse_test(args)

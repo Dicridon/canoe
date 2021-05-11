@@ -1,6 +1,5 @@
 require_relative "source_files"
 require_relative "err"
-
 ##
 # class DepAnalyzer
 #   This class is the key component of canoe, which offers file dependency analysis functionality.
@@ -79,6 +78,8 @@ class DepAnalyzer
     ret
   end
 
+
+  # TODO: bad implementation for the objfile
   def self.should_recompile?(file, build_time)
     judge = build_time
     if build_time == Time.new(0)

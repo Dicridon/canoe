@@ -8,12 +8,11 @@ module Canoe
         filenames.each do |filename|
           dir += "/#{filename}"
           prefix << filename
-          unless Dir.exist? dir
-            FileUtils.mkdir dir
-            Dir.chdir(dir) do
-              puts "created " + Dir.pwd.blue
-              create_working_files prefix.join("__"), filename
-            end
+          next if Dir.exist? dir
+          FileUtils.mkdir dir
+          Dir.chdir(dir) do
+            puts "created " + Dir.pwd.blue
+            create_working_files prefix.join("__"), filename
           end
         end
       end

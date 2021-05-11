@@ -25,3 +25,8 @@ module Canoe
     end
   end
 end
+
+
+a = [1, 2, 3]
+b = a[0..]
+

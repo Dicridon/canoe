@@ -3,16 +3,17 @@ module Canoe
     def add(args)
       args.each do |i|
         dir = @components
-        filenames = i.split("/")
+        filenames = i.split '/'
         prefix = []
         filenames.each do |filename|
           dir += "/#{filename}"
           prefix << filename
           next if Dir.exist? dir
+
           FileUtils.mkdir dir
           Dir.chdir(dir) do
-            puts "created " + Dir.pwd.blue
-            create_working_files prefix.join("__"), filename
+            puts "created + #{Dir.pwd.blue}"
+            create_working_files prefix.join('__'), filename
           end
         end
       end

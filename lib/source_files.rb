@@ -9,15 +9,15 @@ class SourceFiles
       @files
     end
 
-    def get_in(dir, &block)
+    def get_in(dir)
       @files = []
       Dir.each_child(dir) do |f|
         file = "#{dir}/#{f}"
         if File.file? file
           if block_given?
-            @files << "#{file}" if yield(f)
+            @files << file.to_s if yield(f)
           else
-            @files << "#{file}"
+            @files << file.to_s
           end
         end
       end

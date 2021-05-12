@@ -5,8 +5,7 @@ module Canoe
     end
 
     def comp_to_obj(comp)
-      @obj_prefix + comp.delete_suffix(File.extname(comp))[@components_prefix.length..]
-                      .gsub("/", "_") + ".o"
+      @obj_prefix + comp.delete_suffix(File.extname(comp))[@components_prefix.length..].gsub("/", "_") + ".o"
     end
 
     # the if else order is important because tests are regarded as sources
@@ -50,7 +49,7 @@ module Canoe
       flags = ConfigReader.extract_flags "config.json"
       compiler_name = flags["compiler"] ? flags["compiler"] : "clang++"
 
-      abort_on_err "compiler #{compiler_name} not found" unless system "which #{compiler_name}"
+      abort_on_err "compiler #{compiler_name} not found" unless system "which #{compiler_name} > /dev/null"
       compiler_flags = ["-Isrc/components"]
       linker_flags = []
 
@@ -76,40 +75,35 @@ module Canoe
     end
 
     def build_bin(files)
-      build_compiler_from_config
       if build_common(files) &&
-         link_exectutable("./target", Dir.glob("obj/*.o").reject { |f| f.start_with? 'test_' })
+         link_exectutable(@target_short, Dir.glob("obj/*.o").reject { |f| f.start_with? 'test_' })
         puts "BUILDING SUCCEEDED".green
       else
-        puts "building FAILED".red
+        puts "building target FAILED".red
       end
     end
 
     def build_lib(files)
-      build_compiler_from_config
       @compiler.append_compiling_flag "-fPIC"
       if build_common(files) &&
-         link_shared("./target", Dir.glob("obj/*.o").reject { |f| f.start_with? 'test_'})
+         link_shared(@target_short, Dir.glob("obj/*.o").reject { |f| f.start_with? 'test_'})
         puts "BUILDING SUCCEEDED".green
       else
-        puts "building FAILED".red
+        puts "building target FAILED".red
       end
     end
 
     def build_common(files)
-      all = SourceFiles.get_all("./src") { |f| f.end_with? @source_suffix }
-      total = all.size.to_f
-      compiled = total - files.size
-      comps = files.select { |f| f.start_with? @components_prefix }
-      srcs = files - comps
+      all = SourceFiles.get_all(@src_short) { |f| f.end_with? @source_suffix }
+      stepper = Stepper.new all.size, files.size
       flag = true
 
       files.each do |f|
-        progress = (compiled / total).round(2) * 100
-        printf "[#{progress.to_i}%%]".green + " compiling #{f}: "
+        progress = stepper.progress_as_str.green
+        printf "#{progress.green} compiling #{f.yellow}: "
         o = file_to_obj(f)
         flag = false unless compile f, o
-        compiled += 1
+        stepper.step
       end
       flag
     end
@@ -125,21 +119,23 @@ module Canoe
     end
 
     def target_deps
-      get_deps(@deps, @src_short, [@src_short, @components_short])
+      get_deps @deps, @src_short, [@src_short, @components_short]
     end
 
     # contain only headers
     # sources in ./src/components are not included
     def tests_deps
-      get_deps(@test_deps, @tests_short, [@src_short, @components_short])
+      get_deps @test_deps, @tests_short, [@src_short, @components_short]
     end
 
     def build_target
-      puts 'building target...'
-      deps = get_deps(@deps, @src, [@src_short, @components_short])
+      puts "#{'[BUILDING TARGET]'.magenta}..."
+      deps = get_deps @deps, @src, [@src_short, @components_short]
       target = "#{@target}/#{@name}"
       build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
-      files = DepAnalyzer.compiling_filter(deps, build_time, @source_suffix, @header_suffix)
+      files = DepAnalyzer.compiling_filter deps, build_time, @source_suffix, @header_suffix 
+
+      build_compiler_from_config
 
       if files.empty? && File.exist?(target)
         puts "nothing to do, all up to date"

@@ -2,10 +2,10 @@ module Canoe
   class WorkSpace
     def run(args)
       return if @mode == :lib
+
       build []
-      args = args.join " "
-      puts "./target/#{@name} #{args}"
-      exec "./target/#{@name} #{args}"
+      args = args.join ' '
+      issue_command "./target/#{@name} #{args}"
     end
   end
 end

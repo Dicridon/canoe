@@ -1,4 +1,5 @@
 # If the project has circular dependency, this command would fail
+# TODO: add rules for tests
 module Canoe
   class Makefile
     def initialize(workspace)
@@ -16,7 +17,7 @@ module Canoe
     end
 
     def make!(deps)
-      File.open("Makefile", "w") do |f|
+      File.open('Makefile', 'w') do |f|
         if cxx?(get_compiler)
           make_cxx(f, deps)
         else
@@ -28,7 +29,7 @@ module Canoe
     private
 
     def get_compiler
-      @config["compiler"]
+      @config['compiler']
     end
 
     def get_header_suffix
@@ -40,28 +41,28 @@ module Canoe
     end
 
     def get_compiling_flags
-      flags = @config["flags"]["compile"].values.join " "
-      flags + " -I./src/components"
+      flags = @config['flags']['compile'].values.join ' '
+      flags + ' -I./src/components'
     end
 
     def get_ldflags
-      @config["flags"]["link"].values.select { |v| v.start_with?("-L") }.join " "
+      @config['flags']['link'].values.select { |v| v.start_with?('-L') }.join ' '
     end
 
     def get_ldlibs
-      (@config["flags"]["link"].values - (get_ldflags.split)).join " "
+      (@config['flags']['link'].values - (get_ldflags.split)).join ' '
     end
 
     def cxx?(name)
-      return get_compiler.end_with? "++"
+      return get_compiler.end_with? '++'
     end
 
     def make_cxx(makefile, deps)
-      make_common(makefile, "CXX", deps)
+      make_common(makefile, 'CXX', deps)
     end
 
     def make_c(makefile, deps)
-      make_common(makefile, "CC", deps)
+      make_common(makefile, 'CC', deps)
     end
 
     def make_common(makefile, compiler_prefix, deps)
@@ -75,7 +76,7 @@ module Canoe
       makefile.puts("#{compiler_prefix}FLAGS=#{get_compiling_flags}")
       makefile.puts("LDFLAGS=#{get_ldflags}")
       makefile.puts("LDLIBS=#{get_ldlibs}")
-      makefile.puts ""
+      makefile.puts ''
     end
 
     def define_variables(makefile, deps)
@@ -84,18 +85,18 @@ module Canoe
       src_files = deps.keys.select { |f| f.end_with? get_source_suffix }
       generate_all_names(src_files)
       define_srcs(makefile, src_files)
-      makefile.puts ""
+      makefile.puts ''
       define_hdrs(makefile, src_files)
-      makefile.puts ""
+      makefile.puts ''
       define_objs(makefile, src_files)
-      makefile.puts ""
+      makefile.puts ''
     end
 
     def extract_name(name, prefix)
       if name.start_with?(prefix)
-        name.delete_suffix(File.extname(name))[prefix.length..].gsub("/", "_")
+        name.delete_suffix(File.extname(name))[prefix.length..].gsub('/', '_')
       else
-        File.basename(name.split("/")[-1], ".*")
+        File.basename(name.split('/')[-1], '.*')
       end
     end
 
@@ -105,7 +106,7 @@ module Canoe
         @all_names << name
         @src_variables[name] = f
         @hdr_variables[name] = f.gsub(@workspace.source_suffix, @workspace.header_suffix)
-        @obj_variables[name] = @workspace.obj_prefix + extract_name(f, @workspace.components_prefix) + ".o"
+        @obj_variables[name] = @workspace.obj_prefix + extract_name(f, @workspace.components_prefix) + '.o'
       end
     end
 
@@ -227,9 +228,9 @@ module Canoe
                DepAnalyzer.read_from(@deps) :
                DepAnalyzer.new("./src").build_to_file(["./src", "./src/components"], @deps)
 
-      makefile = Makefile.new(self)
-      makefile.configure(config)
-      makefile.make!(deps)
+      makefile = Makefile.new self
+      makefile.configure config
+      makefile.make! deps
     end
   end
 end

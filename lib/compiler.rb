@@ -1,50 +1,49 @@
+require_relative 'util'
+
 ##
 # class Compiler
 #   Storing compiler name in String and flags as an array
-class Compiler
-  attr_reader :name, :flags
-  ##
-  # @name: String
-  # @flgs: Array of String
-  def initialize(name, compiling_flags, linking_flags)
-    @name = name
-    @linking_flags = linking_flags
-    @compiling_flags = compiling_flags
-  end
+module Canoe
+  class Compiler
+    include SystemCommand
 
-  def compiling_flags_as_str
-    @compiling_flags.join " "
-  end
+    attr_reader :name, :flags
 
-  def linking_flags_as_str
-    @linking_flags.join " "
-  end
+    ##
+    # @name: String
+    # @flgs: Array of String
+    def initialize(name, compiling_flags, linking_flags)
+      @name = name
+      @linking_flags = linking_flags
+      @compiling_flags = compiling_flags
+    end
 
-  def append_compiling_flag(flag)
-    @compiling_flags << flag
-  end
+    def compiling_flags_as_str
+      @compiling_flags.join ' '
+    end
 
-  def append_linking_flag(flag)
-    @linking_flags << flag
-  end
+    def linking_flags_as_str
+      @linking_flags.join ' '
+    end
 
-  def compile(src, out)
-    puts "#{name} -o #{out} #{compiling_flags_as_str} -c #{src}"
-    system "#{name} -o #{out} #{compiling_flags_as_str} -c #{src}"
-  end
+    def append_compiling_flag(flag)
+      @compiling_flags << flag
+    end
 
-  def link_executable(out, objs)
-    puts "#{name} -o #{out} #{objs.join(" ")} #{linking_flags_as_str}"
-    system "#{name} -o #{out} #{objs.join(" ")} #{linking_flags_as_str}"
-  end
+    def append_linking_flag(flag)
+      @linking_flags << flag
+    end
 
-  def link_shared(out, objs)
-    puts "#{name} -shared -o #{out}.so #{objs.join(" ")} #{linking_flags_as_str}"
-    system "#{name} -shared -o #{out}.so #{objs.join(" ")} #{linking_flags_as_str}"
-  end
+    def compile(src, out)
+      issue_command "#{name} -o #{out} #{compiling_flags_as_str} -c #{src}"
+    end
 
-  def inspect
-    puts "compiler name: #{name.inspect}"
-    puts "compiler flags: #{flags.inspect}"
+    def link_executable(out, objs)
+      issue_command "#{name} -o #{out} #{objs.join(' ')} #{linking_flags_as_str}"
+    end
+
+    def link_shared(out, objs)
+      issue_command "#{name} -shared -o #{out}.so #{objs.join(' ')} #{linking_flags_as_str}"
+    end
   end
 end

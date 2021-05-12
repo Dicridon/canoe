@@ -3,7 +3,7 @@ module Canoe
     def new
       begin
         Dir.mkdir(@name)
-      rescue
+      rescue SystemCallError
         abort_on_err "workspace #{@name} already exsits"
       end
       Dir.mkdir(@src)
@@ -14,7 +14,7 @@ module Canoe
       else
         DefaultFiles.create_lib_header(@src, @name, @header_suffix)
       end
-      File.new("#{@workspace}/.canoe", "w")
+      File.new("#{@workspace}/.canoe", 'w')
       DefaultFiles.create_config @workspace, @source_suffix, @header_suffix
       # DefaultFiles.create_emacs_dir_local @workspace
 
@@ -22,7 +22,7 @@ module Canoe
       Dir.mkdir(@target)
       Dir.mkdir(@tests)
       Dir.chdir(@workspace) do
-        system "git init"
+        system 'git init'
       end
       puts "workspace #{@workspace.blue} is created"
     end

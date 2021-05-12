@@ -1,6 +1,6 @@
-require_relative "workspace/workspace"
-require_relative "err"
-require_relative "config_reader"
+require_relative 'workspace/workspace'
+require_relative 'util'
+require_relative 'config_reader'
 
 ##
 # class CmdParser
@@ -8,6 +8,7 @@ require_relative "config_reader"
 module Canoe
   class CmdParser
     include Err
+    include WorkSpaceUtil
 
     def initialize(options)
       @options = options
@@ -26,21 +27,6 @@ module Canoe
     end
 
     private
-
-    def get_current_workspace
-      abort_on_err 'not in a canoe workspace' unless File.exists? '.canoe'
-      config = ConfigReader.extract_flags("config.json")
-
-      src_sfx = config["source-suffix"] ? config["source-suffix"] : "cpp"
-      hdr_sfx = config["header-suffix"] ? config["header-suffix"] : "hpp"
-
-      name = Dir.pwd.split("/")[-1]
-      mode = File.exists?("src/main.#{src_sfx}") ? :bin : :lib
-
-      
-      WorkSpace.new(name, mode, src_sfx, hdr_sfx)
-    end
-
     def parse_new(args)
       abort_on_err "not enough arguments to canoe new" if args.size < 1
 
@@ -58,7 +44,7 @@ module Canoe
         end
       end
 
-      abort_on_err("please give a name to this project") unless name
+      abort_on_err('please give a name to this project') unless name
       WorkSpace.new(name, mode.to_sym, suffixes[0], suffixes[1], true).new
     end
 

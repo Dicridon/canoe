@@ -3,7 +3,7 @@ require_relative '../source_files'
 require_relative '../compiler'
 require_relative '../config_reader'
 require_relative '../default_files'
-require_relative '../err'
+require_relative '../util'
 require_relative '../dependence'
 require_relative '../coloring'
 
@@ -13,6 +13,7 @@ module Canoe
   # This class is responsible for the main functionality of canoe, such as building and cleaning
   class WorkSpace
     include Err
+    include SystemCommand
     attr_reader :name, :cwd, :src_prefix, :components_prefix, :obj_prefix, :source_suffix, :header_suffix, :mode
 
     def initialize(name, mode, src_suffix = 'cpp', hdr_suffix = 'hpp', nu = false)

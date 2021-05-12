@@ -1,5 +1,5 @@
-require_relative "source_files"
-require_relative "err"
+require_relative 'source_files'
+require_relative 'util'
 ##
 # class DepAnalyzer
 #   This class is the key component of canoe, which offers file dependency analysis functionality.
@@ -13,141 +13,140 @@ require_relative "err"
 #     Dependencies could be written to a file to avoid wasting time parsing all files, Depanalyzer would read from
 #     this file to construct dependencies. But if sources files included new headers or included headers are revmoed,
 #     Depanalyzer should rebuild the whole dependencies.
-class DepAnalyzer
-  include Err
-  def self.read_from(filename)
-    File.open(filename, "r") do |f|
-      ret = Hash.new []
-      f.each_with_index do |line, i|
-        entry = line.split(": ")
-        Err.abort_on_err("Bad .canoe.deps format, line #{i + 1}") unless entry.length == 2
-        ret[entry[0]] = entry[1].split
-      end
-      ret
-    end
-  end
+module Canoe
+  class DepAnalyzer
+    include Err
+    include SystemCommand
 
-  def self.compiling_filter(deps, build_time, src_sfx = "cpp", hdr_sfx = "hpp")
-    files = []
-    @processed = {}
-    @recompiles = {}
-    deps.keys.each do |k|
-      @processed[k] = false
-      @recompiles[k] = false
-    end
-    deps.each do |k, v|
-      next if k.end_with? ".#{hdr_sfx}"
-      if should_recompile?(k, build_time)
-        files << k
-        @processed[k] = true
-        @recompiles[k] = true
-        next
-      end
-      v.each do |f|
-        if mark(f, build_time, deps) || mark(f.sub(".#{hdr_sfx}", ".#{src_sfx}"), build_time, deps)
-          files << k
-          @processed[k] = true
-          @recompiles[k] = true
-          break
+    class << self
+      include WorkSpaceUtil
+      def read_from(filename)
+        File.open(filename, 'r') do |f|
+          ret = Hash.new []
+          f.each_with_index do |line, i|
+            entry = line.split(': ')
+            abort_on_err("Bad .canoe.deps format, line #{i + 1}") unless entry.length == 2
+            ret[entry[0]] = entry[1].split
+          end
+          ret
         end
       end
-    end
-    files
-  end
 
-  private
-
-  def self.mark(file, build_time, deps)
-    ret = false
-    return false unless File.exists? file
-    if should_recompile?(file, build_time)
-      return true
-    else
-      deps[file].each do |f|
-        if @processed[f]
-          ret |= @recompiles[f]
-          next
+      def compiling_filter(deps, build_time, src_sfx = 'cpp', hdr_sfx = 'hpp')
+        files = []
+        @processed = {}
+        @recompiles = {}
+        deps.each_key do |k|
+          @processed[k] = false
+          @recompiles[k] = false
         end
-        @processed[f] = true
-        if mark(f, build_time, deps)
-          @recompiles[f] = true
-          return true
-        end
-      end
-    end
-    ret
-  end
+        deps.each do |k, v|
+          next if k.end_with? ".#{hdr_sfx}"
 
+          if should_recompile?(k, build_time)
+            files << k
+            @processed[k] = true
+            @recompiles[k] = true
+            next
+          end
+          v.each do |f|
+            next unless mark(f, build_time, deps) || mark(f.sub(".#{hdr_sfx}", ".#{src_sfx}"), build_time, deps)
 
-  # TODO: bad implementation for the objfile
-  def self.should_recompile?(file, build_time)
-    judge = build_time
-    if build_time == Time.new(0)
-      objfile = if file.start_with?("./src/components")
-          "./obj/" + file.delete_suffix(File.extname(file))["./src/components/".length..].gsub("/", "_") + ".o"
-        else
-          "./obj/#{File.basename(file, ".*")}.o"
-        end
-      return true unless File.exists? objfile
-      judge = File.mtime(objfile)
-    end
-    File.mtime(file) > judge
-  end
-
-  public
-
-  def initialize(dir, src_sfx = "cpp", hdr_sfx = "hpp")
-    @dir = dir
-    @deps = Hash.new []
-    @source_suffix = src_sfx
-    @header_suffix = hdr_sfx
-  end
-
-  def build_dependence(include_path)
-    files = SourceFiles.get_all(@dir) do |f|
-      f.end_with?(".#{@source_suffix}") || f.end_with?(".#{@header_suffix}")
-    end
-
-    @deps = Hash.new []
-    files.each do |fname|
-      @deps[fname] = get_all_headers include_path, fname, @header_suffix
-    end
-
-    @deps
-  end
-
-  def build_to_file(include_path, filename)
-    build_dependence include_path
-
-    File.open(filename, "w") do |f|
-      @deps.each do |k, v|
-        f.write "#{k}: #{v.join(" ")}\n"
-      end
-    end
-
-    @deps
-  end
-
-  private
-
-  def get_all_headers(include_path, file, suffix = "hpp")
-    File.open(file, "r") do |f|
-      ret = []
-      if file.end_with?(".#{@source_suffix}")
-        header = file.sub(".#{@source_suffix}", ".#{@header_suffix}")
-        ret += [header] if File.exists?(header)
-      end
-
-      f.each_line do |line|
-        if mat = line.match(/include "(.+\.#{suffix})"/)
-          include_path.each do |path|
-            dep = "#{path}/#{mat[1]}"
-            ret += [dep] if File.exists? dep
+            files << k
+            @processed[k] = true
+            @recompiles[k] = true
+            break
           end
         end
+        files
       end
 
-      ret.uniq
+      private
+
+      def mark(file, build_time, deps)
+        ret = false
+        return false unless File.exist? file
+        return true if should_recompile?(file, build_time)
+
+        deps[file].each do |f|
+          if @processed[f]
+            ret |= @recompiles[f]
+            next
+          end
+          @processed[f] = true
+          if mark(f, build_time, deps)
+            @recompiles[f] = true
+            return true
+          end
+        end
+        ret
+      end
+
+      def should_recompile?(file, build_time)
+        judge = build_time
+        if build_time == Time.new(0)
+          objfile = file_to_obj(file)
+          return true unless File.exist? objfile
+
+          judge = File.mtime(objfile)
+        end
+        File.mtime(file) > judge
+      end
+    end
+
+    def initialize(dir, src_sfx = 'cpp', hdr_sfx = 'hpp')
+      @dir = dir
+      @deps = Hash.new []
+      @source_suffix = src_sfx
+      @header_suffix = hdr_sfx
+    end
+
+    def build_dependence(include_path)
+      files = SourceFiles.get_all(@dir) do |f|
+        f.end_with?(".#{@source_suffix}") || f.end_with?(".#{@header_suffix}")
+      end
+
+      @deps = Hash.new []
+      files.each do |fname|
+        @deps[fname] = get_all_headers include_path, fname, @header_suffix
+      end
+
+      @deps
+    end
+
+    def build_to_file(include_path, filename)
+      build_dependence include_path
+
+      File.open(filename, 'w') do |f|
+        @deps.each do |k, v|
+          f.write "#{k}: #{v.join(' ')}\n"
+        end
+      end
+
+      @deps
+    end
+
+    private
+
+    def get_all_headers(include_path, file, suffix = 'hpp')
+      File.open(file, 'r') do |f|
+        ret = []
+        if file.end_with?(".#{@source_suffix}")
+          header = file.sub(".#{@source_suffix}", ".#{@header_suffix}")
+          ret += [header] if File.exist?(header)
+        end
+
+        f.each_line do |line|
+          if (mat = line.match(/include "(.+\.#{suffix})"/))
+            include_path.each do |path|
+              dep = "#{path}/#{mat[1]}"
+              ret += [dep] if File.exist? dep
+            end
+          end
+        end
+
+        ret.uniq
+      end
     end
   end
 end

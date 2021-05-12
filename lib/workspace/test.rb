@@ -8,7 +8,7 @@ module Canoe
 
       args.each do |arg|
         case arg
-        when "all"
+        when 'all'
           test_all
         else
           test_single arg
@@ -19,23 +19,34 @@ module Canoe
     private
 
     def test_all
-      puts "tests all"
+      build_test
+      fetch_all_test_files.each do |f|
+        test_single File.basename(f, '.*')['test_'.length..]
+      end
     end
 
     def test_single(name)
-      puts "#{@tests}/bin/test_#{name}"
-      # system "./#{@tests}/bin/test_#{name}"
+      bin = "#{@target_short}/test_#{name}"
+      file = "#{@tests_short}/test_#{name}.#{@source_suffix}"
+      abort_on_err "Can not find source file #{file.red} for test #{name.red}" unless File.exist?(file)
+      build_one_test(file, fetch_all_deps) unless File.exist?(bin)
+
+      issue_command bin
     end
 
-    def get_all_test_files
+    def fetch_all_test_files
       Dir.glob("#{@tests_short}/*.#{@source_suffix}").filter do |f|
         File.basename(f).start_with? 'test_'
       end
     end
 
+    def fetch_all_deps
+      target_deps.merge(tests_deps)
+    end
+
     def test_build_time
-      get_all_test_files.map do |f|
-        obj = @target_short + '/' + File.basename(f, '.*')
+      fetch_all_test_files.map do |f|
+        obj = "#{@target_short}/#{File.basename(f, '.*')}"
         File.exist?(obj) ? File.mtime(obj) : Time.new(0)
       end.min
     end
@@ -61,42 +72,66 @@ module Canoe
 
     # @deps is the dependency hash for tests
     # cyclic dependency is not handled
-    def compile_each_test(test_file, deps)
+    # compiler should first be built
+    def compile_one_test(test_file, deps)
       extract_one_file(test_file, deps).each do |f|
         o = file_to_obj(f)
         next if File.exist?(o) && File.mtime(o) > File.mtime(f)
 
-        compile(obj, f)
+        compile(f, o)
       end
       compile(test_file, file_to_obj(test_file))
     end
 
-    def link_all_test(deps)
-      get_all_test_files.each do |f|
-        target = "#{@target_short}/#{File.basename(f, '.*')}"
-        obj = file_to_obj(f)
-        @compiler.link_executable target, extract_one_file_obj(f, deps) + [obj]
-      end
+    def link_one_test(test_file, deps)
+      target = "#{@target_short}/#{File.basename(test_file, '.*')}"
+      @compiler.link_executable target, extract_one_file_obj(test_file, deps) + [file_to_obj(test_file)]
     end
 
+    def build_one_test(test_file, deps)
+      compile_one_test(test_file, deps)
+      link_one_test(test_file, deps)
+    end
 
-    # TODO: display should be updated
-    def build_test
-      puts 'building tests...'
-      total_deps = target_deps.merge(tests_deps)
-      build_time = test_build_time
-      files = DepAnalyzer.compiling_filter(total_deps, build_time, @source_suffix, @header_suffix).select do |f|
+    def compile_all_tests(deps)
+      files = DepAnalyzer.compiling_filter(deps, test_build_time, @source_suffix, @header_suffix).select do |f|
         File.basename(f).start_with?('test_')
       end
 
-      files.each do |f|
-        compile_each_test(f, total_deps)
-      end
+      stepper = Stepper.new fetch_all_test_files.size, files.size
 
+      files.each do |f|
+        printf "#{stepper.progress_as_str.green} compiling #{f} "
+        compile_one_test(f, deps)
+        stepper.step
+      end
+    end
+
+    def link_all_tests(deps)
+      all_files = fetch_all_test_files
+
+      stepper = Stepper.new all_files.size, all_files.size
+      fetch_all_test_files.each do |f|
+        printf "#{stepper.progress_as_str.green} linking #{File.basename(f, '.*').yellow}: "
+        link_one_test(f, deps)
+        stepper.step
+      end
+    end
+
+    # TODO: display should be updated
+    def build_test
+      puts "#{'[COMPILING TESTS]'.magenta}..."
+      return unless test_build_time
+
+      total_deps = fetch_all_deps
+      compile_all_tests(total_deps)
+      puts "#{'[100%]'.green} compiling done, starts linking..."
+      puts "#{'[LINKING TESTS]'.magenta}..."
       # compilation and link are separated because they may be separated
       # by unexpected interrupt like C-c, C-d, etc.
       # thus unditionally link all tests
-      link_all_test(total_deps)
+      link_all_tests(total_deps)
+      puts "#{'[100%]'.green} linking done"
     end
   end
 end

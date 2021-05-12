@@ -1,16 +1,16 @@
 # Canoe
 If you are a C/C++ programmer, writing `Makefile`, `CMakeLists.txt` or `SConstruct` may have been a pain for you. Even though `cmake` and `scons` are more human-friendly than legacy `make`, writing building scripts is still a mental torture because we simply forget all the syntaxes once the scripts are finished.
 
-Such mental torture drives me to write `canoe`, a C/C++ project management tool inspired by `cargo` for Rust. Rustaceans simple type `cargo new`, `cargo build` and `cargo run` to create, build and run a Rust project. Now C/C++ programmers may type `canoe new`, `canoe build` and `canoe run` to create, build and run a C/C++ project without any scripting! Moreover, `canoe make` generates a `Makefile` for you for compatibility with legacy projects and machines!
+Such mental torture drives me to write `canoe`, a C/C++ project management tool inspired by `cargo` for Rust. Rustaceans simply type `cargo new`, `cargo build` and `cargo run` to create, build and run a Rust project. Now C/C++ programmers may type `canoe new`, `canoe build` and `canoe run` to create, build and run a C/C++ project without any scripting! Moreover, `canoe make` generates a `Makefile` for you for compatibility with legacy projects and machines!
 
 # Functionality and limitations
-- Building the whole project without forcing users to write building scripts
+- Building the whole project without forcing users to write any building scripts
 - Automatically analyze which files should be recompiled
-- Capable to interact with `make` based C/C++ projects
+- Capable to interact with `make`-based C/C++ projects
 - Conventions over file naming should be followed
 - Unlike `make`, which is a universal building tool, `canoe` is specialized for C/C++.
 # Prerequisite
-Ruby 2.7.1 or above
+To use beginless and endless range, `canoe` needs Ruby 2.7.1 or above
 
 # Installation
 `gem intall canoe` to enjoy it!
@@ -22,19 +22,23 @@ Ruby 2.7.1 or above
 The directory structure of a demo canoe project is as follow:
 ```
 demo
-   |----config
+   |----config.json
    |----obj
    |----src
    |     |----components
    |     |     |----dir1
-   |     |           |----dir1.hpp
-   |     |           |----dir1.cpp
+   |     |     |     |----dir1.hpp
+   |     |     |     |----dir1.cpp
    |     |     |----dir2
-   |     |           |----dir2.hpp
-   |     |           |----dir2.cpp
+   |     |     |     |----dir2.hpp
+   |     |     |     |----dir2.cpp
+   |     |     |----tests
+   |     |     |     |----tests.hpp
+   |     |     |     |----tests.cpp
    |     |----main.cpp
    |----target
    |     |----demo
+   |----tests
    |----third-party
 ```
 `demo`: all commands except `canoe new` and `canoe version` should be executed under this directory.
@@ -45,7 +49,11 @@ demo
 
 `src`: all source files are seperated into components. `canoe add` may add extra components to this project.
 
+`src/components/tests`: common functionalities for tests are implemented in this sub directory.
+
 `target`: compiled executable binary or .so files are stored here.
+
+`tests`: source files for exectutable test files are all in this directory
 
 `third-party`: external libraries are stored here.
 
@@ -78,12 +86,16 @@ a config file is a json file
 Say we are developing a car project. so we type `canoe new car` to create it. We will have a project like below:
 ```
 car
-  |----config
+  |----config.json
   |----obj
   |----src
   |     |----components
+  |     |     |----tests
+  |     |     |     |----tests.hpp
+  |     |     |     |----tests.cpp
   |     |----main.cpp
   |----target
+  |----tests
   |----third-party
 ```
 Now we want to add a component `engine` to this project, so we type `canoe add engine`, and our project would be:
@@ -96,30 +108,41 @@ car
   |     |     |----engine
   |     |     |     |----engine.hpp
   |     |     |     |----engine.cpp
+  |     |     |----tests
+  |     |     |     |----tests.hpp
+  |     |     |     |----tests.cpp
   |     |----main.cpp
   |----target
+  |----tests
   |----third-party
 ```
 
-To use classes and funcitons in `eninge`, we just need to include `engine/engine.hpp` in other source files(canoe adds `./components` to include path).
+To use classes and functions in `eninge`, we just need to include `engine/engine.hpp` in other source files(canoe adds `./src/components` to include path).
 
-After some coding, we want to run this project for a test, so we just need to type `canoe run`, canoe would build this project and run the executable binary for you. And the project would be:
+After some coding, we want to run this project to see how this demo works, so we just need to type `canoe run`, canoe would build this project and run the executable binary for you. And the project would be:
 ```
 car
   |----config
   |----obj
   |     |----engin_engine.o
   |     |----main.o
+  |     |----tests.o
   |----src
   |     |----components
   |     |     |----engine
   |     |     |     |----engine.hpp
   |     |     |     |----engine.cpp
+  |     |     |----tests
+  |     |     |     |----tests.hpp
+  |     |     |     |----tests.cpp
   |     |----main.cpp
   |----target
   |     |----car
+  |----tests
   |----third-party
 ```
+Note that since we haven't added any code to `./src/components/tests/tests.cpp`, the `tests.o` object file is empty and of no use. It is compiled just because it is part of the project. 
+
 Later if we decide to add one more helper component called `spark_plug` to component `engine`, we just need to type `canoe add enging/spark_plug`, and the project would be
 ```
 car
@@ -127,6 +150,7 @@ car
   |----obj
   |     |----engin_engine.o
   |     |----main.o
+  |     |----tests.o  
   |----src
   |     |----components
   |     |     |----engine
@@ -135,12 +159,76 @@ car
   |     |     |     |----spark_plug
   |     |     |     |     |----spark_plug.hpp
   |     |     |     |     |----spark_plug.cpp
+  |     |     |----tests
+  |     |     |     |----tests.hpp
+  |     |     |     |----tests.cpp
   |     |----main.cpp
   |----target
   |     |----car
+  |----tests
   |----third-party
 ```
 surely we would add one more line such as `#include "spark_plug/spark_plug.hpp"` to our `engine.hpp` or `engine.cpp`, so we need `canoe update` to update dependency relationships, then we could just `canoe run` again to see the output of our project.
+
+# Test
+After having fun with `canoe` for a while, we want to do some serious work and tests are important, thus we decide to add some tests to our project. We decide to test component `engine` to see if this module works fine.
+
+So we **manually** add a file called `test_engine.cpp` in `./tests` directory. Every test file should begin with `test_` follow by a name of a component of current project. Of course we need to include `engine/engine.hpp` in `test_engine.cpp`. Our project now would be:
+```
+car
+  |----config
+  |----obj
+  |     |----engin_engine.o
+  |     |----main.o
+  |     |----tests.o  
+  |----src
+  |     |----components
+  |     |     |----engine
+  |     |     |     |----engine.hpp
+  |     |     |     |----engine.cpp
+  |     |     |     |----spark_plug
+  |     |     |     |     |----spark_plug.hpp
+  |     |     |     |     |----spark_plug.cpp
+  |     |     |----tests
+  |     |     |     |----tests.hpp
+  |     |     |     |----tests.cpp
+  |     |----main.cpp
+  |----target
+  |     |----car
+  |----tests
+  |     |----test_engine.cpp
+  |----third-party
+```
+Then we type `canoe test engine`, `canoe` will start looking for an executable file named `test_engine` in `./target` and execute it if found. If the exectutable is missing, `canoe` analyze dependency of `test_engine.cpp` and build it, then execute the test. After this, the project would be:
+
+```
+car
+  |----config
+  |----obj
+  |     |----engin_engine.o
+  |     |----main.o
+  |     |----tests.o  
+  |----src
+  |     |----components
+  |     |     |----engine
+  |     |     |     |----engine.hpp
+  |     |     |     |----engine.cpp
+  |     |     |     |----spark_plug
+  |     |     |     |     |----spark_plug.hpp
+  |     |     |     |     |----spark_plug.cpp
+  |     |     |----tests
+  |     |     |     |----tests.hpp
+  |     |     |     |----tests.cpp
+  |     |----main.cpp
+  |----target
+  |     |----car
+  |     |----test_engine
+  |----tests
+  |     |----test_engine.cpp
+  |----third-party
+```
+
+When there are a lot of tests, we may use `canoe test` to run all tests. 
 
 # Interaction with Make
 Since `v0.3.1`, `canoe` understands how to generate `Makefile`. We may freely choose any two commands among `canoe build`, `canoe clean`, `make` and `make clean` to build our projects once `Makefile` is generated via command `canoe make`. (Eventually my schoolmates won't complain about they have to install `Ruby` even when the servers have no access to the Internet :).
@@ -152,7 +240,27 @@ I intended to write a `canoe cmake` for `CMake` users, but considering that `CMa
 # Let's write it together
 I'm practicing `Ruby` with this tool, a lot of optimizations can be further conducted and my code style is not quite in the `Ruby` way. Plus, compared with `cargo`, `canoe` has only the basic building functionalities. So if you are interested in `canoe`, please join me and let's enhance `canoe` together! Send me an email at `noahxiong@outlook.com` if you'd like to join!
 
+# Misc
+
+## Why the project layout
+One may feel uncomfortable with the separation of `./src/components/tests` from `./tests`, since they are all testing related, why not put them together? 
+
+I choose this layout because the dependency analyzer I implemented works for source files all in one directory, while I separate `./tests` and `./src/components` to allow multiple files containing `main` function, thus for tests, sources files are in different directories. This layout allows me directly use the analyzer without any modification to it.
+
+## General workflow of using `canoe`
+I usually first `canoe new` to create my project and `canoe add` to add all components I need. Then after finishing one component, I create a test file for it and `canoe test` to test it.
+After all components are finished, I finish the `main.cpp` and use `canoe make` to generate a `Makefile` for fast compilation. 
+
+Sometimes I need to implement several versions of the project and compile several different executable files for experiments, so I make use of tests. I simply create several test files such as `test_v1.cpp`, `test_v2.cpp`, then use `canoe test v1` and `canoe test v2` to run different experiments.
+
 # Change log
+- v0.3.2:
+  - new features
+    - command `canoe test` is finally here! Now `canoe build test`, `canoe test` will do the testing things for you
+  - bug fixes:
+    - `canoe run` runs only when building succeeds or target exists
+  - RoadMap:
+    - `canoe borrow` is a little complex because conflicts need to be resolved, I'm still considering it
 - v0.3.1:
   - new features
     - new command `canoe make` is provided to generate a Makefile for a canoe project, so now `canoe` projects are compatible with `Makefile` based projects

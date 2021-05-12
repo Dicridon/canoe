@@ -7,6 +7,8 @@ module Canoe
           canoe new tada: create a project named 'tada' in current directory
             
           canoe build: compile current project (execute this command in project directory)
+
+          canoe test: build and run tests
       
           canoe generate: generate dependency relationships and store it in '.canoe.deps' file. Alias: update
 
@@ -48,8 +50,12 @@ module Canoe
           So when a file includes new headers or some headers are removed, users have to use 'canoe udpate'
           to update dependency relationships.
       
-      build [options]:
-          build current project, arguments in [options] will be passed to C++ compiler
+      build [all|test]:
+          build current project, 'all' builds both target and tests, 'test' builds tests only
+
+      test [tests]:
+          build and run tests
+          [tests]: 'all' for all tests, or a name of a test for a single test
         
       run [options]:
           build current project with no specific compilation flags, and run this project, passing [options] as command line arguments to the binary

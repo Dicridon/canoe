@@ -15,6 +15,25 @@ module Canoe
         end
       end
     end
+    
+    # extract one test file's dependency
+    def extract_one_file(file, deps)
+      ret = deps[file]
+
+      deps[file].each do |f|
+        dep = extract_one_file(f, deps)
+        dep.each do |d|
+          ret << d unless ret.include?(d)
+        end
+      end
+      ret.map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
+    end
+
+    def extract_one_file_obj(file, deps)
+      extract_one_file(file, deps).map do |f|
+        file_to_obj(f)
+      end
+    end
 
     private
 
@@ -49,25 +68,6 @@ module Canoe
         obj = "#{@target_short}/#{File.basename(f, '.*')}"
         File.exist?(obj) ? File.mtime(obj) : Time.new(0)
       end.min
-    end
-
-    # extract one test file's dependency
-    def extract_one_file(file, deps)
-      ret = deps[file]
-
-      deps[file].each do |f|
-        dep = extract_one_file(f, deps)
-        dep.each do |d|
-          ret << d unless ret.include?(d)
-        end
-      end
-      ret.map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
-    end
-
-    def extract_one_file_obj(file, deps)
-      extract_one_file(file, deps).map do |f|
-        file_to_obj(f)
-      end
     end
 
     # @deps is the dependency hash for tests
@@ -118,7 +118,6 @@ module Canoe
       end
     end
 
-    # TODO: display should be updated
     def build_test
       puts "#{'[COMPILING TESTS]'.magenta}..."
       return unless test_build_time

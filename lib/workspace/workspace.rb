@@ -14,7 +14,9 @@ module Canoe
   class WorkSpace
     include Err
     include SystemCommand
-    attr_reader :name, :cwd, :src_prefix, :components_prefix, :obj_prefix, :source_suffix, :header_suffix, :mode
+    attr_reader :name, :cwd, :src_prefix, :components_prefix, :obj_prefix,
+                :source_suffix, :header_suffix, :mode, :target_short,
+                :src_short, :components_short, :obj_short, :tests_short
 
     def initialize(name, mode, src_suffix = 'cpp', hdr_suffix = 'hpp', nu = false)
       @name = name

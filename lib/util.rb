@@ -44,6 +44,14 @@ module Canoe
     def file_to_obj(file)
       get_current_workspace.file_to_obj(file)
     end
+
+    def extract_one_file(file, deps)
+      get_current_workspace.extract_one_file(file, deps)
+    end
+
+    def extract_one_file_obj(file, deps)
+      get_current_workspace.extract_one_file_obj(file, deps)
+    end
   end
 
   module SystemCommand

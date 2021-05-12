@@ -76,17 +76,19 @@ module Canoe
 
     def build_bin(files)
       if build_common(files) &&
-         link_exectutable(@target_short, Dir.glob("obj/*.o").reject { |f| f.start_with? 'test_' })
+         link_exectutable(@target_short, Dir.glob("obj/*.o").reject { |f| f.start_with? 'obj/test_' })
         puts "BUILDING SUCCEEDED".green
+        return true
       else
         puts "building target FAILED".red
+        return false
       end
     end
 
     def build_lib(files)
       @compiler.append_compiling_flag "-fPIC"
       if build_common(files) &&
-         link_shared(@target_short, Dir.glob("obj/*.o").reject { |f| f.start_with? 'test_'})
+         link_shared(@target_short, Dir.glob("obj/*.o").reject { |f| f.start_with? 'obj/test_'})
         puts "BUILDING SUCCEEDED".green
       else
         puts "building target FAILED".red

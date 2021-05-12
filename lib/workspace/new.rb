@@ -23,6 +23,7 @@ module Canoe
       Dir.mkdir(@tests)
       Dir.chdir(@workspace) do
         system 'git init'
+        system 'canoe add tests'
       end
       puts "workspace #{@workspace.blue} is created"
     end

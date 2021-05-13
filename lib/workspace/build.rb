@@ -141,7 +141,7 @@ module Canoe
 
       if files.empty? && File.exist?(target)
         puts "nothing to do, all up to date"
-        return
+        return true
       end
 
       self.send "build_#{@mode.to_s}", files

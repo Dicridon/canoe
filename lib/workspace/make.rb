@@ -208,25 +208,23 @@ module Canoe
 
     def make_obj_rules(makefile, deps)
       cmplr = cxx?(get_compiler) ? 'CXX' : 'CC'
-      makefile.puts("all: OUT\n")
-      makefile.puts ''
 
       @all_names.each do |n|
-        makefile.puts("$(OBJ_#{n}): $(#{n}_DEP)\n\t$(#{cmplr}) $(#{cmplr}FLAGS) -o $@ -c $(SRC_#{n})")
-        makefile.puts ''
+        makefile.puts("$(OBJ_#{n}): $(#{n}_DEP)\n\t$(#{cmplr}) $(#{cmplr}FLAGS) -o $@ -c $(SRC_#{n})\n\n")
       end
-
     end
 
     def make_out_rules(makefile, deps)
       cmplr = cxx?(get_compiler) ? 'CXX' : 'CC'
       if @workspace.mode == :bin
-        makefile.puts("OUT: $(OUT_OBJS)\n\t$(#{cmplr}) $(#{cmplr}FLAGS) -o $(TARGET) $(OUT_OBJS) $(LDFLAGS) $(LDLIBS)")
+        makefile.puts("out: $(OUT_OBJS)\n\t$(#{cmplr}) $(#{cmplr}FLAGS) -o $(TARGET) $(OUT_OBJS) $(LDFLAGS) $(LDLIBS)")
       else
-        makefile.puts("OUT: $(OUT_OBJS)\n\t$(#{cmplr}) $(#{cmplr}FLAGS) -shared -o $(TARGET) $(OUT_OBJS) -fPIC $(LDFLAGS) $(LDLIBS)")
+        makefile.puts("out: $(OUT_OBJS)\n\t$(#{cmplr}) $(#{cmplr}FLAGS) -shared -o $(TARGET) $(OUT_OBJS) -fPIC $(LDFLAGS) $(LDLIBS)")
       end
       makefile.puts ''
       makefile.puts("test: $(TESTS)")
+      makefile.puts ''
+      makefile.puts("all: out test")
     end
 
     def make_tests_rules(makefile, deps)
@@ -256,10 +254,9 @@ module Canoe
     def make_rules(makefile, deps)
       make_dependencies makefile, deps
       makefile.puts ''
-      make_obj_rules makefile, deps
-      makefile.puts ''
       make_out_rules makefile, deps
       makefile.puts ''
+      make_obj_rules makefile, deps
       make_tests_rules makefile, deps
       makefile.puts ''
       make_clean makefile

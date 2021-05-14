@@ -53,31 +53,38 @@ module Canoe
         abort_on_err "it's not reasonable to add a component with no name given"
       end
 
-      get_current_workspace.add args
+      current_workspace.add args
     end
 
     def parse_build(args)
-      get_current_workspace.build args
+      options = {[] => 'target', ['all'] => 'all', ['test'] => 'test', ['base'] => 'base'}
+      abort_on_err "Unkown subcommand #{args.join(" ").red}" unless options.include?(args)
+      current_workspace.build options[args]
     end
 
     def parse_generate(args)
-      get_current_workspace.generate
+      current_workspace.generate
     end
 
     def parse_run(args)
-      get_current_workspace.run args
+      current_workspace.run args
     end
 
     def parse_dep(args)
-      get_current_workspace.dep
+      current_workspace.dep
     end
 
     def parse_clean(args)
-      get_current_workspace.clean args
+      options = {
+        [] => 'all', ['all'] => 'all',
+        ['target'] => 'target', ['tests'] => 'tests', ['obj'] => 'obj'
+      }
+      abort_on_err "Unkown subcommand #{args.join(" ").red}" unless options.include?(args)
+      current_workspace.clean options[args]
     end
 
     def parse_test(args)
-      get_current_workspace.test args
+      current_workspace.test args
     end
 
     def parse_version(args)
@@ -89,11 +96,11 @@ module Canoe
     end
 
     def parse_update(args)
-      get_current_workspace.update
+      current_workspace.update
     end
 
     def parse_make(args)
-      get_current_workspace.make
+      current_workspace.make
     end
   end
 end

@@ -1,6 +1,9 @@
 require_relative 'coloring'
 
 module Canoe
+  ##
+  # Stepper record the progress of a task
+  # progress is obtained via #'progress_as_str
   class Stepper
     def initialize(total, togo)
       @total = total.to_f
@@ -16,11 +19,11 @@ module Canoe
       @togo -= 1 if @togo.positive?
     end
   end
-  
+
   ##
   # wrapping workspace related functionality to expose to other modules
   module WorkSpaceUtil
-    def get_current_workspace
+    def current_workspace
       abort_on_err 'not in a canoe workspace' unless File.exist? '.canoe'
       config = ConfigReader.extract_flags('config.json')
 
@@ -34,23 +37,23 @@ module Canoe
     end
 
     def src_to_obj(src)
-      get_current_workspace.src_to_obj(src)
+      current_workspace.src_to_obj(src)
     end
 
     def comp_to_obj(comp)
-      get_current_workspace.comp_to_obj(comp)
+      current_workspace.comp_to_obj(comp)
     end
 
     def file_to_obj(file)
-      get_current_workspace.file_to_obj(file)
+      current_workspace.file_to_obj(file)
     end
 
     def extract_one_file(file, deps)
-      get_current_workspace.extract_one_file(file, deps)
+      current_workspace.extract_one_file(file, deps)
     end
 
     def extract_one_file_obj(file, deps)
-      get_current_workspace.extract_one_file_obj(file, deps)
+      current_workspace.extract_one_file_obj(file, deps)
     end
   end
 

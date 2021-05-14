@@ -11,6 +11,8 @@ module Canoe
   ##
   # A workspace resents a C/C++ project
   # This class is responsible for the main functionality of canoe, such as building and cleaning
+  # TODO
+  #   add a command to generate compile_commands.json so users won't have to install bear
   class WorkSpace
     include Err
     include SystemCommand

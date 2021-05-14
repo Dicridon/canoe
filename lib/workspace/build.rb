@@ -1,3 +1,4 @@
+require 'json'
 module Canoe
   class WorkSpace
     def src_to_obj(src)
@@ -18,14 +19,9 @@ module Canoe
     end
 
     # args are commandline parameters passed to `canoe build`,
-    # could be 'all', 'test', 'target' or empty
-    def build(args)
-      options = {[] => 'target', ['all'] => 'all', ['test'] => 'test'}
-      if options.include?(args)
-        send "build_#{options[args]}"
-      else
-        abort_on_err "Unkown subcommand #{args.join(" ").red}"
-      end
+    # could be 'all', 'test', 'target', 'base' or empty
+    def build(arg = 'target')
+      send "build_#{arg}"
     end
 
     private
@@ -132,10 +128,9 @@ module Canoe
 
     def build_target
       puts "#{'[BUILDING TARGET]'.magenta}..."
-      deps = get_deps @deps, @src, [@src_short, @components_short]
       target = "#{@target}/#{@name}"
       build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
-      files = DepAnalyzer.compiling_filter deps, build_time, @source_suffix, @header_suffix 
+      files = DepAnalyzer.compiling_filter target_deps, build_time, @source_suffix, @header_suffix 
 
       build_compiler_from_config
 
@@ -145,6 +140,49 @@ module Canoe
       end
 
       self.send "build_#{@mode.to_s}", files
+    end
+
+    # generate a compile_commands.json file
+    def build_base
+      deps = target_deps.merge tests_deps
+      build_compiler_from_config
+      database = CompilationDatabase.new
+      deps.each_key do |k|
+        next if k.end_with? @header_suffix
+        arg =  ['c++'] + @compiler.compiling_flags_as_str.split + [k] + [file_to_obj(k)] + ['-c', '-o']
+        database.add_command_object(@workspace, arg, k)
+      end
+      File.open('compile_commands.json', 'w') do |f|
+        f.puts database.pretty_to_s
+      end
+    end
+  end
+
+  class CompilationDatabase
+    attr_reader :database
+    def initialize
+      @database = []
+    end
+
+    def add_command_object(dir, arguments, file)
+      temp = {             
+        "arguments" => arguments,
+        "directory" => dir,
+        "file" => file
+      }
+      @database << temp
+    end
+
+    def to_s
+      @database.to_s
+    end
+
+    def pretty_to_s
+      JSON.pretty_generate(@database)
+    end
+
+    def to_json
+      @database.to_json
     end
   end
 end

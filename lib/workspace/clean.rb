@@ -1,16 +1,8 @@
 module Canoe
   class WorkSpace
     # valid options: none, 'all', 'target', 'tests'
-    def clean(args)
-      options = {
-        [] => 'all', ['all'] => 'all',
-        ['target'] => 'target', ['tests'] => 'tests', ['obj'] => 'obj'
-      }
-      if options.include?(args)
-        send "clean_#{options[args]}"
-      else
-        abort_on_err "Unkown subcommand #{args.join(' ').red}"
-      end
+    def clean(arg = 'all')
+      send "clean_#{arg}"
     end
 
     private

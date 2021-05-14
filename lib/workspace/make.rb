@@ -1,6 +1,8 @@
 # If the project has circular dependency, this command would fail
 module Canoe
-  class Makefile
+  ##
+  # CanoeMakefile is used to offer makefile generation utilities
+  class CanoeMakefile
     include WorkSpaceUtil
     def initialize(workspace)
       @workspace = workspace
@@ -269,7 +271,7 @@ module Canoe
 
       deps = target_deps.merge tests_deps
 
-      makefile = Makefile.new self
+      makefile = CanoeMakefile.new self
       makefile.configure config
       makefile.make! deps
     end

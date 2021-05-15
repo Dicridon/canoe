@@ -10,19 +10,18 @@ class DefaultFiles
       end
     end
 
-    def create_config(path, src_sfx = 'cpp', hdr_sfx = 'hpp')
+    def create_config(path, compiler = 'clang++', src_sfx = 'cpp', hdr_sfx = 'hpp')
       open_file_and_write(
         "#{path}/config.json",
         <<~CONFIG
           {
-              "compiler": "clang++",
+              "compiler": "#{compiler}",
               "header-suffix": "#{hdr_sfx}",
               "source-suffix": "#{src_sfx}",
               "flags": {
                   "compile": {
                       "opt": "-O2",
-                      "debug": "-g",
-                      "std": "-std=c++17"
+                      "debug": "-g"
                   },
                   "link": {
 
@@ -34,12 +33,13 @@ class DefaultFiles
     end
 
     def create_main(path, suffix = 'cpp')
+      header = suffix == 'c' ? 'stdio.h' : 'iostream'
       open_file_and_write(
         "#{path}/main.#{suffix}",
         <<~DOC
-          #include <iostream>
+          #include <#{header}>
           int main(int argc, char *argv[]) {
-              std::cout << "hello world!" << std::endl;
+
           }
         DOC
       )

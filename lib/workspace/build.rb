@@ -149,7 +149,9 @@ module Canoe
       database = CompilationDatabase.new
       deps.each_key do |k|
         next if k.end_with? @header_suffix
-        arg =  ['c++'] + @compiler.compiling_flags_as_str.split + [k] + [file_to_obj(k)] + ['-c', '-o']
+        c = @compiler.name.end_with?('++') ? 'c++' : 'c'
+
+        arg =  [c] + @compiler.compiling_flags_as_str.split + [k] + [file_to_obj(k)] + ['-c', '-o']
         database.add_command_object(@workspace, arg, k)
       end
       File.open('compile_commands.json', 'w') do |f|

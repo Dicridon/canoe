@@ -15,8 +15,8 @@ module Canoe
         DefaultFiles.create_lib_header(@src, @name, @header_suffix)
       end
       File.new("#{@workspace}/.canoe", 'w')
-      DefaultFiles.create_config @workspace, @source_suffix, @header_suffix
-      # DefaultFiles.create_emacs_dir_local @workspace
+      compiler = @source_suffix == 'c' ? 'clang' : 'clang++'
+      DefaultFiles.create_config @workspace, compiler, @source_suffix, @header_suffix
 
       Dir.mkdir(@third)
       Dir.mkdir(@target)

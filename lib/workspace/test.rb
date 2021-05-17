@@ -45,11 +45,18 @@ module Canoe
     end
 
     def test_single(name)
+      rebuild = false;
       bin = "#{@target_short}/test_#{name}"
+      rebuild ||= !File.exist?(bin)
+      
       file = "#{@tests_short}/test_#{name}.#{@source_suffix}"
-      abort_on_err "Can not find source file #{file.red} for test #{name.red}" unless File.exist?(file)
-      build_compiler_from_config
-      build_one_test(file, fetch_all_deps) unless File.exist?(bin)
+      
+      deps = fetch_all_deps
+      extract_one_file(file, deps).push(file).each do |f|
+        rebuild ||= File.mtime(bin) < File.mtime(f)
+      end
+
+      build_compiler_from_config && build_one_test(file, deps) if rebuild
 
       issue_command bin
     end
@@ -122,10 +129,6 @@ module Canoe
     def build_test
       puts "#{'[COMPILING TESTS]'.magenta}..."
       return unless test_build_time
-
-      puts @compiler.compiling_flags_as_str
-      puts @compiler.linking_flags_as_str
-
 
       total_deps = fetch_all_deps
       compile_all_tests(total_deps)

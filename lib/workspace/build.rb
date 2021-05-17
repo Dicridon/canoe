@@ -21,6 +21,7 @@ module Canoe
     # args are commandline parameters passed to `canoe build`,
     # could be 'all', 'test', 'target', 'base' or empty
     def build(arg = 'target')
+      build_compiler_from_config
       send "build_#{arg}"
     end
 
@@ -132,8 +133,6 @@ module Canoe
       build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
       files = DepAnalyzer.compiling_filter target_deps, build_time, @source_suffix, @header_suffix 
 
-      build_compiler_from_config
-
       if files.empty? && File.exist?(target)
         puts "nothing to do, all up to date"
         return true
@@ -145,7 +144,6 @@ module Canoe
     # generate a compile_commands.json file
     def build_base
       deps = target_deps.merge tests_deps
-      build_compiler_from_config
       database = CompilationDatabase.new
       deps.each_key do |k|
         next if k.end_with? @header_suffix

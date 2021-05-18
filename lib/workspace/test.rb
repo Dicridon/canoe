@@ -50,15 +50,19 @@ module Canoe
       rebuild ||= !File.exist?(bin)
       
       file = "#{@tests_short}/test_#{name}.#{@source_suffix}"
+      rebuild ||= File.mtime(bin) < File.mtime(file)
       
       deps = fetch_all_deps
-      extract_one_file(file, deps).push(file).each do |f|
-        rebuild ||= File.mtime(bin) < File.mtime(f)
+      extract_one_file(file, deps).each do |f|
+        rebuild ||= File.mtime(bin) < File.mtime(f) || File.mtime(bin) < File.mtime(hdr_of_src(f))
       end
 
-      build_compiler_from_config && build_one_test(file, deps) if rebuild
-
-      issue_command bin
+      if rebuild
+        build_compiler_from_config
+        issue_command bin if build_one_test(file, deps)
+      else
+        issue_command bin
+      end
     end
 
     def fetch_all_test_files
@@ -84,7 +88,7 @@ module Canoe
     def compile_one_test(test_file, deps)
       extract_one_file(test_file, deps).each do |f|
         o = file_to_obj(f)
-        next if File.exist?(o) && File.mtime(o) > File.mtime(f)
+        next if File.exist?(o) && File.mtime(o) > File.mtime(f) && File.mtime(o) > File.mtime(hdr_of_src(f))
 
         compile(f, o)
       end

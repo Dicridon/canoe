@@ -18,6 +18,10 @@ module Canoe
       end
     end
 
+    def hdr_of_src(file)
+      file.gsub(".#{@source_suffix}", ".#{@header_suffix}")
+    end
+
     # args are commandline parameters passed to `canoe build`,
     # could be 'all', 'test', 'target', 'base' or empty
     def build(arg = 'target')

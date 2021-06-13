@@ -267,7 +267,7 @@ module Canoe
 
   class WorkSpace
     def make
-      config = ConfigReader.extract_flags "config.json"
+      config = ConfigReader.new('config.json').extract_flags
 
       deps = target_deps.merge tests_deps
 

@@ -25,7 +25,7 @@ module Canoe
   module WorkSpaceUtil
     def current_workspace
       abort_on_err 'not in a canoe workspace' unless File.exist? '.canoe'
-      config = ConfigReader.extract_flags('config.json')
+      config = ConfigReader.new('config.json').extract_flags
 
       src_sfx = config['source-suffix'] || 'cpp'
       hdr_sfx = config['header-suffix'] || 'hpp'

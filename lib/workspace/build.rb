@@ -47,14 +47,14 @@ module Canoe
     end
 
     def build_compiler_from_config
-      flags = ConfigReader.extract_flags "config.json"
-      compiler_name = flags["compiler"] ? flags["compiler"] : "clang++"
+      flags = ConfigReader.new('config.json').extract_flags
+      compiler_name = flags['compiler'] ? flags['compiler'] : 'clang++'
 
       abort_on_err "compiler #{compiler_name} not found" unless system "which #{compiler_name} > /dev/null"
-      compiler_flags = ["-Isrc/components"]
+      compiler_flags = ['-Isrc/components']
       linker_flags = []
 
-      c_flags, l_flags = flags["flags"]["compile"], flags["flags"]["link"]
+      c_flags, l_flags = flags['flags']['compile'], flags['flags']['link']
       build_flags(compiler_flags, c_flags)
       build_flags(linker_flags, l_flags)
 

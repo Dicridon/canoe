@@ -257,6 +257,9 @@ After all components are finished, I finish the `main.cpp` and use `canoe make` 
 Sometimes I need to implement several versions of the project and compile several different executable files for experiments, so I make use of tests. I simply create several test files such as `test_v1.cpp`, `test_v2.cpp`, then use `canoe test v1` and `canoe test v2` to run different experiments.
 
 # Change log
+- v0.3.2.4
+  - bug fixes:
+    - `canoe test` recompiles test files when headers are modified
 - v0.3.2.3
   - bug fixes:
     - `canoe test` does not rebuild the executable when source files are modified, now fixed

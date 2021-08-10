@@ -266,7 +266,9 @@ Please remember, we have to `canoe update` when new components are added because
     - `canoe run/test` does not display error message if running process crashes, now fixed
   - changes:
     - usage of `canoe test` changes, for details, please read the help message.
-        
+- v0.3.2.4
+  - bug fixes:
+    - `canoe test` recompiles test files when headers are modified
 - v0.3.2.3
   - bug fixes:
     - `canoe test` does not rebuild the executable when source files are modified, now fixed

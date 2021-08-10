@@ -8,7 +8,8 @@ module Canoe
       end
       Dir.mkdir(@src)
       Dir.mkdir(@components)
-      Dir.mkdir("#{@workspace}/obj")
+      Dir.mkdir(@obj)
+      add_gitignore @obj
       if @mode == :bin
         DefaultFiles.create_main(@src, @source_suffix)
       else
@@ -20,12 +21,23 @@ module Canoe
 
       Dir.mkdir(@third)
       Dir.mkdir(@target)
+      add_gitignore @target      
       Dir.mkdir(@tests)
       Dir.chdir(@workspace) do
-        system 'git init'
-        system 'canoe add tests'
+        issue_command 'git init'
+        issue_command 'canoe add tests'
       end
       puts "workspace #{@workspace.blue} is created"
+    end
+
+    private
+
+    def add_gitignore(dir)
+      Dir.chdir(dir) do
+        File.open('.gitignore', 'w') do |f|
+          f.write "*\n!.gitignore\n"
+        end
+      end
     end
   end
 end

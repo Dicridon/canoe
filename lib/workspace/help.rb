@@ -53,9 +53,10 @@ module Canoe
       build [all|test]:
           build current project, 'all' builds both target and tests, 'test' builds tests only
 
-      test [tests]:
+      test [tests] [args]:
           build and run tests
           [tests]: 'all' for all tests, or a name of a test for a single test
+          [args]: args are passed to the single test
         
       run [options]:
           build current project with no specific compilation flags, and run this project, passing [options] as command line arguments to the binary

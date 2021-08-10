@@ -30,13 +30,14 @@ class SourceFiles
     def get_all_helper(dir, &block)
       Dir.each_child(dir) do |f|
         file = "#{dir}/#{f}"
+        # we don't handle symlinks
         if File.file? file
           if block_given?
             @files << "#{file}" if yield(f)
           else
             @files << "#{file}"
           end
-        else
+        elsif File.directory? file
           get_all_helper("#{file}", &block)
         end
       end

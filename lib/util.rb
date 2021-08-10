@@ -1,5 +1,7 @@
 require_relative 'coloring'
 
+require 'English'
+
 module Canoe
   ##
   # Stepper record the progress of a task
@@ -60,7 +62,14 @@ module Canoe
   module SystemCommand
     def issue_command(cmd_str)
       puts cmd_str
-      system cmd_str
+      system(cmd_str)
+    end
+
+    def run_command(cmd_str)
+      puts cmd_str
+      status = system(cmd_str)
+      puts $CHILD_STATUS unless status
+      status
     end
   end
   

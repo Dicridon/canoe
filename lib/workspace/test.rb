@@ -5,15 +5,8 @@ module Canoe
         test_all
         return
       end
-
-      args.each do |arg|
-        case arg
-        when 'all'
-          test_all
-        else
-          test_single arg
-        end
-      end
+      # we don't handle spaces
+      test_single(args[0], args[1..].join(" "))
     end
     
     # extract one test file's dependency
@@ -44,9 +37,10 @@ module Canoe
       end
     end
 
-    def test_single(name)
+    def test_single(name, args = "")
       rebuild = false;
       bin = "#{@target_short}/test_#{name}"
+
       rebuild ||= !File.exist?(bin)
       
       file = "#{@tests_short}/test_#{name}.#{@source_suffix}"
@@ -57,11 +51,12 @@ module Canoe
         rebuild ||= File.mtime(bin) < File.mtime(f) || File.mtime(bin) < File.mtime(hdr_of_src(f))
       end
 
+      cmd = "#{bin} #{args}"
       if rebuild
         build_compiler_from_config
-        issue_command bin if build_one_test(file, deps)
+        run_command cmd if build_one_test(file, deps)
       else
-        issue_command bin
+        run_command cmd
       end
     end
 

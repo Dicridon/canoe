@@ -238,7 +238,7 @@ Another reason pushing me to write `canoe make` is that single-thread compilatio
 I intended to write a `canoe cmake` for `CMake` users, but considering that `CMake` projects eventually invoke `make`, I decided to implement `canoe make` only.
 
 # Interaction with compilation database
-Some language servers require a `compile_commands.json` file to support syntax analysis and code completion. If you also use `eglot + clangd` like me, you may wish `canoe` can generate one for you. Since `v0.3.2.2`, `canoe` contains a command `canoe build base` to generate a `compile_commands.json` file for you. Alternatively, you may generate a `Makefile` via `canoe make` and then use `compile_commands.json` generating tool [bear](https://github.com/rizsotto/Bear) for generation. My personal recommendation would be using `canoe build base` because `bear` requires a `make clean` to purge all compiled objects before running it while  `canoe build base` does not.
+Some language servers require a `compile_commands.json` file to support syntax analysis and code completion. If you also use `eglot + clangd` like me, you may wish `canoe` could generate one for you. Since `v0.3.2.2`, `canoe` contains a command `canoe build base` to generate a `compile_commands.json` file. Alternatively, you may generate a `Makefile` via `canoe make` and then use `compile_commands.json` generating tool [bear](https://github.com/rizsotto/Bear) for generation. My personal recommendation would be using `canoe build base` because `bear` requires a `make clean` to purge all compiled objects before running it while  `canoe build base` does not.
 
 # Let's write it together
 I'm practicing `Ruby` with this tool, a lot of optimizations can be further conducted and my code style is not quite in the `Ruby` way. Plus, compared with `cargo`, `canoe` has only the basic building functionalities. So if you are interested in `canoe`, please join me and let's enhance `canoe` together! Send me an email at `noahxiong@outlook.com` if you'd like to join!
@@ -248,7 +248,7 @@ I'm practicing `Ruby` with this tool, a lot of optimizations can be further cond
 ## Why the project layout
 One may feel uncomfortable with the separation of `./src/components/tests` from `./tests`, since they are all testing related, why not put them together? 
 
-I choose this layout because the dependency analyzer I implemented works for source files all in one directory, while I separate `./tests` and `./src/components` to allow multiple files containing `main` function, thus for tests, sources files are in different directories. This layout allows me directly use the analyzer without any modification to it.
+I choose this layout because the dependency analyzer I implemented works for source files all in one directory, while I separate `./tests` and `./src/components` to allow multiple files containing `main` function, thus for tests, sources files are in different directories. This layout allows me to directly use the analyzer without any modification.
 
 ## General workflow of using `canoe`
 I usually first `canoe new` to create a project and `canoe add` to add all components I need.  After finishing one component, I create a test file for it and `canoe test` to test it.
@@ -256,7 +256,17 @@ After all components are finished, I finish the `main.cpp` and use `canoe make` 
 
 Sometimes I need to implement several versions of the project and compile several different executable files for experiments, so I make use of tests. I simply create several test files such as `test_v1.cpp`, `test_v2.cpp`, then use `canoe test v1` and `canoe test v2` to run different experiments.
 
+Please remember, we have to `canoe update` when new components are added because the dependency cache `.canoe.deps` should be updated.
+
 # Change log
+- v0.3.3
+  - bug fixes:
+    - `canoe build` aborts when symlinks are in the working directories, now fixed. Note `canoe` does not access any symlinks.
+    - `canoe build` may fail when building a `canoe` project pulled from Github whose `obj` and `target` directories are not tracked (broken project structure). Now `canoe new` automatically add `.gitignore` file under the two directories so that project structure is reserved.
+    - `canoe run/test` does not display error message if running process crashes, now fixed
+  - changes:
+    - usage of `canoe test` changes, for details, please read the help message.
+        
 - v0.3.2.3
   - bug fixes:
     - `canoe test` does not rebuild the executable when source files are modified, now fixed

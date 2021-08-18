@@ -11,7 +11,7 @@ module Canoe
     
     # extract one test file's dependency
     def extract_one_file(file, deps)
-      ret = deps[file]
+      ret = deps[file].map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
 
       deps[file].each do |f|
         dep = extract_one_file(f, deps)

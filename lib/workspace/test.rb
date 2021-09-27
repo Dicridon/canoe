@@ -44,6 +44,7 @@ module Canoe
       rebuild ||= !File.exist?(bin)
       
       file = "#{@tests_short}/test_#{name}.#{@source_suffix}"
+      abort_on_err "No test file exists for #{name}" unless File.exist?(file)
       rebuild ||= File.mtime(bin) < File.mtime(file)
       
       deps = fetch_all_deps
@@ -126,6 +127,7 @@ module Canoe
     end
 
     def build_test
+      build_compiler_from_config
       puts "#{'[COMPILING TESTS]'.magenta}..."
       return unless test_build_time
 

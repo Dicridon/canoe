@@ -71,7 +71,7 @@ a config file is a json file
       "std": "-std=c++17"
     },
     "link": {
-
+      "some_lib": "-Lpath_to_lib -llib"
     }
   }
 }

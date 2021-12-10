@@ -8,7 +8,7 @@ module Canoe
       # we don't handle spaces
       test_single(args[0], args[1..].join(" "))
     end
-    
+
     # extract one test file's dependency
     def extract_one_file(file, deps)
       ret = deps[file].map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
@@ -42,11 +42,11 @@ module Canoe
       bin = "#{@target_short}/test_#{name}"
 
       rebuild ||= !File.exist?(bin)
-      
+
       file = "#{@tests_short}/test_#{name}.#{@source_suffix}"
       abort_on_err "No test file exists for #{name}" unless File.exist?(file)
       rebuild ||= File.mtime(bin) < File.mtime(file)
-      
+
       deps = fetch_all_deps
       extract_one_file(file, deps).each do |f|
         rebuild ||= File.mtime(bin) < File.mtime(f) || File.mtime(bin) < File.mtime(hdr_of_src(f))
@@ -78,26 +78,22 @@ module Canoe
       end.min
     end
 
-    # @deps is the dependency hash for tests
-    # cyclic dependency is not handled
-    # compiler should first be built
-    def compile_one_test(test_file, deps)
-      extract_one_file(test_file, deps).each do |f|
-        o = file_to_obj(f)
-        next if File.exist?(o) && File.mtime(o) > File.mtime(f) && File.mtime(o) > File.mtime(hdr_of_src(f))
-
-        compile(f, o)
-      end
-      compile(test_file, file_to_obj(test_file))
-    end
-
     def link_one_test(test_file, deps)
       target = "#{@target_short}/#{File.basename(test_file, '.*')}"
       @compiler.link_executable target, extract_one_file_obj(test_file, deps) + [file_to_obj(test_file)]
     end
 
     def build_one_test(test_file, deps)
-      compile_one_test(test_file, deps)
+      files = DepAnalyzer.compiling_filter(target_deps, Time.new(0), @source_suffix, @header_suffix)
+      flag = true
+      files << test_file
+
+      files.each do |f|
+        o = file_to_obj(f)
+        flag = false unless compile f, o
+      end
+
+      abort_on_err("Compiling errors encountered") unless flag;
       link_one_test(test_file, deps)
     end
 
@@ -110,7 +106,7 @@ module Canoe
 
       files.each do |f|
         printf "#{stepper.progress_as_str.green} compiling #{f} "
-        compile_one_test(f, deps)
+        build_one_test(f, deps)
         stepper.step
       end
     end

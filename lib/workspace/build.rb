@@ -135,7 +135,7 @@ module Canoe
       puts "#{'[BUILDING TARGET]'.magenta}..."
       target = "#{@target}/#{@name}"
       build_time = File.exist?(target) ? File.mtime(target) : Time.new(0)
-      files = DepAnalyzer.compiling_filter target_deps, build_time, @source_suffix, @header_suffix 
+      files = DepAnalyzer.compiling_filter(target_deps, build_time, @source_suffix, @header_suffix)
 
       if files.empty? && File.exist?(target)
         puts "nothing to do, all up to date"

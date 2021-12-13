@@ -90,7 +90,7 @@ module Canoe
 
       files.each do |f|
         o = file_to_obj(f)
-        flag = false unless compile f, o
+        flag &= compile f, o
       end
 
       abort_on_err("Compiling errors encountered") unless flag;

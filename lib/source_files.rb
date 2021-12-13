@@ -13,13 +13,11 @@ class SourceFiles
       @files = []
       Dir.each_child(dir) do |f|
         file = "#{dir}/#{f}"
-        if File.file? file
-          if block_given?
-            @files << file.to_s if yield(f)
-          else
-            @files << file.to_s
-          end
-        end
+        next unless File.file?(file)
+
+        add = true
+        add = yield(f) if block_given?
+        @files << file.to_s if add
       end
 
       @files
@@ -32,13 +30,11 @@ class SourceFiles
         file = "#{dir}/#{f}"
         # we don't handle symlinks
         if File.file? file
-          if block_given?
-            @files << "#{file}" if yield(f)
-          else
-            @files << "#{file}"
-          end
+          add = true
+          add = yield(f) if block_given?
+          @files << file if add
         elsif File.directory? file
-          get_all_helper("#{file}", &block)
+          get_all_helper(file, &block)
         end
       end
     end

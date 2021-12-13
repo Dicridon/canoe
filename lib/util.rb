@@ -1,3 +1,4 @@
+# Many useful classes to record compiling progress, change file's name and issueing system commands
 require_relative 'coloring'
 
 require 'English'
@@ -59,6 +60,8 @@ module Canoe
     end
   end
 
+  ##
+  # issueing system commands by accepting a command string
   module SystemCommand
     def issue_command(cmd_str)
       puts cmd_str
@@ -72,7 +75,9 @@ module Canoe
       status
     end
   end
-  
+
+  ##
+  # Colorized error messages with abortion
   module Err
     def warn_on_err(err)
       puts <<~ERR

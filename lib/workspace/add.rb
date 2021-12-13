@@ -1,4 +1,5 @@
 module Canoe
+  # WorkSpace implementation
   class WorkSpace
     def add(args)
       args.each do |i|

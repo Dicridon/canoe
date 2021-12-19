@@ -12,13 +12,17 @@ module Canoe
     # extract one test file's dependency
     def extract_one_file(file, deps)
       ret = deps[file].map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
-
-      deps[file].each do |f|
-        dep = extract_one_file(f, deps)
-        dep.each do |d|
-          ret << d unless ret.include?(d)
+      begin
+        deps[file].each do |f|
+          dep = extract_one_file(f, deps)
+          dep.each do |d|
+            ret << d unless ret.include?(d)
+          end
         end
-      end
+      rescue SystemStackError
+        puts "#{"Fatal: ".red}file #{file} is circularly included"
+        exit false
+      end      
       ret.map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
     end
 
@@ -83,17 +87,23 @@ module Canoe
       @compiler.link_executable target, extract_one_file_obj(test_file, deps) + [file_to_obj(test_file)]
     end
 
-    def build_one_test(test_file, deps)
+    def build_one_test(test_file, deps, indent = "")
       files = DepAnalyzer.compiling_filter(target_deps, Time.new(0), @source_suffix, @header_suffix)
       flag = true
       files << test_file
 
+      stepper = Stepper.new(files.size, files.size)
+
       files.each do |f|
         o = file_to_obj(f)
+        printf "#{indent}#{stepper.progress_as_str.green} compiling #{f.yellow}: "
         flag &= compile f, o
+        stepper.step
       end
-
       abort_on_err("Compiling errors encountered") unless flag;
+      
+      printf "#{indent}#{stepper.progress_as_str.green} compiling finished\n"
+      puts "#{indent}[100%]".green + " linking"
       link_one_test(test_file, deps)
     end
 
@@ -105,8 +115,8 @@ module Canoe
       stepper = Stepper.new fetch_all_test_files.size, files.size
 
       files.each do |f|
-        printf "#{stepper.progress_as_str.green} compiling #{f} "
-        build_one_test(f, deps)
+        printf "#{stepper.progress_as_str.green} building #{File.basename(f, "." + @source_suffix).yellow}:\n"
+        build_one_test(f, deps, "    ")
         stepper.step
       end
     end

@@ -17,6 +17,7 @@ module Canoe
     include SystemCommand
 
     class << self
+      include Err
       include WorkSpaceUtil
       def read_from(filename)
         File.open(filename, 'r') do |f|
@@ -32,28 +33,27 @@ module Canoe
 
       def compiling_filter(deps, build_time, src_sfx = 'cpp', hdr_sfx = 'hpp')
         files = []
-        @processed = {}
         @recompiles = {}
         deps.each_key do |k|
-          @processed[k] = false
           @recompiles[k] = false
         end
         deps.each do |k, v|
           next if k.end_with? ".#{hdr_sfx}"
 
-          if should_recompile?(k, build_time)
-            files << k
-            @processed[k] = true
-            @recompiles[k] = true
-            next
-          end
+          # first analyze dependency to discover circular includes
           v.each do |f|
             next unless mark(f, build_time, deps) || mark(f.sub(".#{hdr_sfx}", ".#{src_sfx}"), build_time, deps)
 
             files << k
-            @processed[k] = true
             @recompiles[k] = true
             break
+          end
+
+          next if @recompiles[k]
+
+          if should_recompile?(k, build_time)
+            files << k
+            @recompiles[k] = true
           end
         end
         files
@@ -62,22 +62,19 @@ module Canoe
       private
 
       def mark(file, build_time, deps)
-        ret = false
         return false unless File.exist? file
-        return true if should_recompile?(file, build_time)
 
+        # first analyze dependency to discover circular includes
         deps[file].each do |f|
-          if @processed[f]
-            ret |= @recompiles[f]
-            next
-          end
-          @processed[f] = true
           if mark(f, build_time, deps)
             @recompiles[f] = true
             return true
           end
+        rescue SystemStackError
+          puts "#{"Fatal: ".red}file #{file} is circularly included"
+          exit false
         end
-        ret
+        true if should_recompile?(file, build_time)
       end
 
       def should_recompile?(file, build_time)

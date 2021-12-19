@@ -84,7 +84,7 @@ module Canoe
     def define_variables(makefile, deps)
       define_dirs(makefile)
       src_files = deps.keys.select { |f| f.end_with? get_source_suffix }
-      
+
       generate_all_names(src_files)
       define_srcs(makefile, src_files)
       makefile.puts ''
@@ -163,15 +163,20 @@ module Canoe
     end
 
     def get_all_dep_name(file_name, deps)
-      dep = deps[file_name]
-      if dep.empty?
-        []
-      else
-        tmp = dep.map { |n| extract_name(n, @workspace.components_prefix).upcase }
-        dep.each do |d|
-          tmp += get_all_dep_name(d, deps)
+      begin
+        dep = deps[file_name]
+        if dep.empty?
+          []
+        else
+          tmp = dep.map { |n| extract_name(n, @workspace.components_prefix).upcase }
+          dep.each do |d|
+            tmp += get_all_dep_name(d, deps)
+          end
+          tmp
         end
-        tmp
+      rescue SystemStackError
+        puts "#{"Fatal: ".red}file #{file_name} is circularly included"
+        exit false
       end
     end
 
@@ -246,7 +251,7 @@ module Canoe
     def make_clean(makefile)
       clean = <<~DOC
             .PHONY: clean
-            clean: 
+            clean:
             \trm ./target/*
             \trm ./obj/*.o
             DOC

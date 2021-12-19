@@ -259,6 +259,9 @@ Sometimes I need to implement several versions of the project and compile severa
 Please remember, we have to `canoe update` when new components are added because the dependency cache `.canoe.deps` should be updated.
 
 # Change log
+- v0.3.3.4:
+  - bug fixes: 
+    - Circularly included headers can cause `SystemStackError` exception. Now `canoe run`, `canoe build`, `canoe make` and `canoe test` abort if circular includes are detected.
 - v0.3.3.3:
   - bug fixes:
     - `canoe test` runs a compiled test target even if the latest code fails to compile. Now fixed.

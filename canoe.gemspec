@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "canoe"
-  s.version = "0.3.3.4"
+  s.version = "0.3.3.5"
   s.summary = "a C/C++ project management and building tool"
   s.description = <<~DES
     Canoe offers project management and building facilities to C/C++ projects.

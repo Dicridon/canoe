@@ -84,7 +84,8 @@ module Canoe
 
     def link_one_test(test_file, deps)
       target = "#{@target_short}/#{File.basename(test_file, '.*')}"
-      @compiler.link_executable target, extract_one_file_obj(test_file, deps) + [file_to_obj(test_file)]
+      all_objs = Dir.glob("obj/*.o").reject { |f| f.start_with?('obj/test_') || f == 'obj/main.o'} 
+      @compiler.link_executable target, all_objs + [file_to_obj(test_file)]
     end
 
     def build_one_test(test_file, deps, indent = "")

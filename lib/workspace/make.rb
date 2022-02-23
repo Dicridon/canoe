@@ -242,7 +242,6 @@ module Canoe
         objs = ["$(OBJ_#{n})"] + extract_one_file_obj(filename, deps).map do |o|
           "$(OBJ_#{File.basename(o, '.*').upcase})"
         end
-
         makefile.puts("$(#{n}): #{objs.join ' '}\n\t$(#{cmplr}) $(#{cmplr}FLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)")
         makefile.puts ''
       end
@@ -264,6 +263,7 @@ module Canoe
       make_out_rules makefile, deps
       makefile.puts ''
       make_obj_rules makefile, deps
+      makefile.puts ''
       make_tests_rules makefile, deps
       makefile.puts ''
       make_clean makefile

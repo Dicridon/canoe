@@ -10,7 +10,7 @@ class String
       34 => :blue,
       35 => :magenta,
       36 => :cyan,
-      37 => :white,
+      37 => :white
     }
     colors.each do |k, v|
       define_method v do

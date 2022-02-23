@@ -9,12 +9,43 @@ module Canoe
       test_single(args[0], args[1..].join(" "))
     end
 
-    # extract one test file's dependency
+    # extract all files the file depends on, including headers
     def extract_one_file(file, deps)
-      ret = deps[file].map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
+      ret = []
+      holder = deps[file] + deps[file].map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
+      extract_one_file_helper(file, deps, holder, ret)
+      ret.uniq
+    end
+
+    def extract_one_file_obj(file, deps)
+      ret = extract_one_file(file, deps).map do |f|
+        file_to_obj(f)
+      end
+      ret.uniq
+    end
+
+    def extract_one_file_header(file, deps)
+      ret = extract_one_file(file, deps).map do |f|
+        f.gsub(".#{@source_suffix}", ".#{@header_suffix}")
+      end
+      ret.uniq
+    end
+
+    def extract_one_file_source(file, deps)
+      ret = extract_one_file(file, deps).map do |f|
+        f.gsub(".#{@header_suffix}", ".#{@source_suffix}")
+      end
+      ret.uniq
+    end
+
+    private
+
+    # extract one test file's dependency
+    def extract_one_file_helper(file, deps, ref, ret)
       begin
-        deps[file].each do |f|
-          dep = extract_one_file(f, deps)
+        ref.each do |f|
+          ret << f unless ret.include?(f)
+          dep = extract_one_file_helper(f, deps, deps[f], ret) 
           dep.each do |d|
             ret << d unless ret.include?(d)
           end
@@ -23,16 +54,7 @@ module Canoe
         puts "#{"Fatal: ".red}file #{file} is circularly included"
         exit false
       end      
-      ret.map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
     end
-
-    def extract_one_file_obj(file, deps)
-      extract_one_file(file, deps).map do |f|
-        file_to_obj(f)
-      end
-    end
-
-    private
 
     def test_all
       build_test
@@ -84,14 +106,13 @@ module Canoe
 
     def link_one_test(test_file, deps)
       target = "#{@target_short}/#{File.basename(test_file, '.*')}"
-      all_objs = Dir.glob("obj/*.o").reject { |f| f.start_with?('obj/test_') || f == 'obj/main.o'} 
-      @compiler.link_executable target, all_objs + [file_to_obj(test_file)]
+      @compiler.link_executable target, [file_to_obj(test_file)] + extract_one_file_obj(test_file, deps)
     end
 
     def build_one_test(test_file, deps, indent = "")
       files = DepAnalyzer.compiling_filter(target_deps, Time.new(0), @source_suffix, @header_suffix)
+                .intersection(extract_one_file_source(test_file, deps)) << test_file
       flag = true
-      files << test_file
 
       stepper = Stepper.new(files.size, files.size)
 

@@ -259,8 +259,11 @@ Sometimes I need to implement several versions of the project and compile severa
 Please remember, we have to `canoe update` when new components are added because the dependency cache `.canoe.deps` should be updated.
 
 # Change log
+- v0.3.3.6:
+  - bug fixes: `canoe make` generates wrong `Makefile` that can't compile tests using nested components, now fixed
+  - optimizations: `canoe test` compiles all object files without skipping unrelevant components, now it compiles only the required files by the test file.
 - v0.3.3.5:
-  - buf fixes: `canoe test` fails to build projects with nested components, now fixed.
+  - bug fixes: `canoe test` fails to build projects with nested components, now fixed.
 - v0.3.3.4:
   - bug fixes: 
     - Circularly included headers can cause `SystemStackError` exception. Now `canoe run`, `canoe build`, `canoe make` and `canoe test` abort if circular includes are detected.

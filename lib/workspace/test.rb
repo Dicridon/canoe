@@ -14,6 +14,8 @@ module Canoe
       ret = []
       holder = deps[file] + deps[file].map { |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
       extract_one_file_helper(file, deps, holder, ret)
+
+      ret = ret + ret.map{ |f| f.gsub(".#{@header_suffix}", ".#{@source_suffix}") }
       ret.uniq
     end
 
@@ -45,7 +47,7 @@ module Canoe
       begin
         ref.each do |f|
           ret << f unless ret.include?(f)
-          dep = extract_one_file_helper(f, deps, deps[f], ret) 
+          dep = extract_one_file_helper(f, deps, deps[f], ret)
           dep.each do |d|
             ret << d unless ret.include?(d)
           end
@@ -53,7 +55,7 @@ module Canoe
       rescue SystemStackError
         puts "#{"Fatal: ".red}file #{file} is circularly included"
         exit false
-      end      
+      end
     end
 
     def test_all
@@ -74,6 +76,7 @@ module Canoe
       rebuild ||= File.mtime(bin) < File.mtime(file)
 
       deps = fetch_all_deps
+
       extract_one_file(file, deps).each do |f|
         rebuild ||= File.mtime(bin) < File.mtime(f) || File.mtime(bin) < File.mtime(hdr_of_src(f))
       end
@@ -123,7 +126,7 @@ module Canoe
         stepper.step
       end
       abort_on_err("Compiling errors encountered") unless flag;
-      
+
       printf "#{indent}#{stepper.progress_as_str.green} compiling finished\n"
       puts "#{indent}[100%]".green + " linking"
       link_one_test(test_file, deps)

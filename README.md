@@ -259,8 +259,10 @@ Sometimes I need to implement several versions of the project and compile severa
 Please remember, we have to `canoe update` when new components are added because the dependency cache `.canoe.deps` should be updated.
 
 # Change log
+- v0.3.3.8:
+  - Behavior change: `canoe test` and `canoe build` now unconditionally link the targets so that the change in external libraries can be updated to the targets timely.
 - v0.3.3.7:
-  - buf fixes: `canoe test` misses some dependency during building, now fixed.
+  - bug fixes: `canoe test` misses some dependency during building, now fixed.
 - v0.3.3.6:
   - bug fixes: `canoe make` generates wrong `Makefile` that can't compile tests using nested components, now fixed
   - optimizations: `canoe test` compiles all object files without skipping unrelevant components, now it compiles only the required files by the test file.

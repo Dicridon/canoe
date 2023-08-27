@@ -66,6 +66,7 @@ module Canoe
     end
 
     def link_exectutable(odir, objs)
+      puts "#{'[LINKING TARGET]'.magenta}..."
       puts "#{"[100%]".green} linking"
       @compiler.link_executable "#{odir}/#{@name}", objs
     end
@@ -97,6 +98,7 @@ module Canoe
     end
 
     def build_common(files)
+      return true if files.empty?
       all = SourceFiles.get_all(@src_short) { |f| f.end_with? @source_suffix }
       stepper = Stepper.new all.size, files.size
       flag = true
@@ -138,8 +140,7 @@ module Canoe
       files = DepAnalyzer.compiling_filter(target_deps, build_time, @source_suffix, @header_suffix)
 
       if files.empty? && File.exist?(target)
-        puts "nothing to do, all up to date"
-        return true
+        puts "nothing to compile, trying to link"
       end
 
       self.send "build_#{@mode.to_s}", files
@@ -169,7 +170,7 @@ module Canoe
     end
 
     def add_command_object(dir, arguments, file)
-      temp = {             
+      temp = {
         "arguments" => arguments,
         "directory" => dir,
         "file" => file

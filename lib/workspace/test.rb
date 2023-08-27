@@ -66,7 +66,8 @@ module Canoe
     end
 
     def test_single(name, args = "")
-      rebuild = false;
+      puts "[COMPILING TEST #{name}]".magenta
+      rebuild = false
       bin = "#{@target_short}/test_#{name}"
 
       rebuild ||= !File.exist?(bin)
@@ -82,11 +83,13 @@ module Canoe
       end
 
       cmd = "#{bin} #{args}"
+      build_compiler_from_config
       if rebuild
-        build_compiler_from_config
         run_command cmd if build_one_test(file, deps)
       else
-        run_command cmd
+        puts "nothing to compile, all up to date"
+        puts "[RELINKING...]".magenta
+        run_command cmd if link_one_test(file, deps)
       end
     end
 

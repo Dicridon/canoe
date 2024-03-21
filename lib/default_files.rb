@@ -10,6 +10,18 @@ class DefaultFiles
       end
     end
 
+    def create_clang_format(path)
+      open_file_and_write(
+        "#{path}/.clang-format",
+        <<~CLANG
+          BasedOnStyle: LLVM
+          IndentWidth: 4
+          ColumnLimit: 86
+          NamespaceIndentation: All
+        CLANG
+      )
+    end
+
     def create_config(path, compiler = 'clang++', src_sfx = 'cpp', hdr_sfx = 'hpp')
       open_file_and_write(
         "#{path}/config.json",

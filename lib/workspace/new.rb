@@ -26,6 +26,7 @@ module Canoe
       Dir.chdir(@workspace) do
         issue_command 'git init'
         issue_command 'canoe add tests'
+        DefaultFiles.create_clang_format @workspace
       end
       puts "workspace #{@workspace.blue} is created"
     end
